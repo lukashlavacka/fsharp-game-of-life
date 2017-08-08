@@ -4334,28 +4334,31 @@
     ]
   },
   "packageFolders": {
-    "/Users/Lukas/.nuget/packages/": {},
-    "/usr/local/share/dotnet/sdk/NuGetFallbackFolder": {}
+    "C:\\Users\\lukas\\.nuget\\packages\\": {},
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/Lukas/Development/fsharp-game-of-life/fsharp-game-of-life.fsproj",
+      "projectUniqueName": "C:\\Git\\Lukas\\fsharp-game-of-life\\fsharp-game-of-life.fsproj",
       "projectName": "fsharp-game-of-life",
-      "projectPath": "/Users/Lukas/Development/fsharp-game-of-life/fsharp-game-of-life.fsproj",
-      "packagesPath": "/Users/Lukas/.nuget/packages/",
-      "outputPath": "/Users/Lukas/Development/fsharp-game-of-life/obj/",
+      "projectPath": "C:\\Git\\Lukas\\fsharp-game-of-life\\fsharp-game-of-life.fsproj",
+      "packagesPath": "C:\\Users\\lukas\\.nuget\\packages\\",
+      "outputPath": "C:\\Git\\Lukas\\fsharp-game-of-life\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
-        "/usr/local/share/dotnet/sdk/NuGetFallbackFolder"
+        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
       ],
       "configFilePaths": [
-        "/Users/Lukas/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\lukas\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp2.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "\\\\192.168.1.250\\NuGet\\packages": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {

@@ -5,6 +5,16 @@ type World = Cell[,]
 
 module Array2D =
     let flatten<'T> = Seq.cast<'T> >> Seq.toArray
+    let toArray<'T> (arr: 'T[,]) = Array.init (Array2D.length1 arr) (fun i -> arr.[i, *] )
+
+module Pretty =
+    let cell = function
+        | Alive -> "1"
+        | _ -> "0"
+    let row (r: Cell[]) = r |> Array.map cell |> String.concat ""
+    let world (w: World) = w |> Array2D.toArray |> Array.map row |> String.concat "\n"
+        
+
 
 let initRandomWorld x y: World = 
     let rnd = Random()
@@ -20,5 +30,5 @@ let isAlive (neighbors: Cell[,]): Cell =
 
 [<EntryPoint>]
 let main argv: int =
-    initRandomWorld 3 3 |> isAlive |> printfn "%A"
+    initRandomWorld 3 3 |> Pretty.world |> printfn "%O"
     0 // return an integer exit code
