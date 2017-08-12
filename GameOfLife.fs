@@ -7,36 +7,40 @@ type World = Cell[,]
 
 module Array2D =
     type Mode = Zero | Donut | CylinderX | CylinderY
-    let flatten<'T> = Seq.cast<'T> >> Seq.toArray
+    let flatten<'T> (arr: 'T[,]) = arr |> Seq.cast<'T> |> Seq.toArray
     let toArray<'T> (arr: 'T[,]) = Array.init (Array2D.length1 arr) (fun i -> arr.[i, *] )
     let translateX<'T> (mode: Mode) (zero: 'T) (o: int) (arr: 'T[,]) =
         match mode with
-            | Zero -> arr |> Array2D.mapi (fun ix iy _ ->
+            | Zero -> arr |> Array2D.mapi (fun iy ix _ ->
                     if
                         ix - o < 0 ||
-                        ix - o >= Array2D.length1 arr
+                        ix - o >= Array2D.length2 arr
                     then zero
-                    else arr.[ix - o, iy]
+                    else arr.[iy, ix - o]
                 )
-            | Donut -> arr |> Array2D.mapi (fun ix iy _ ->
-                    if ix - o < 0 then arr.[(Array2D.length1 arr + ix - o) % Array2D.length1 arr, iy]
-                    else if ix - o >= Array2D.length1 arr then arr.[(ix - o) % Array2D.length1 arr, iy]
-                    else arr.[ix - o, iy]
+            | Donut -> arr |> Array2D.mapi (fun iy ix _ ->
+                    let xLength = Array2D.length1 arr
+                    let mx = o % xLength
+                    if ix - mx < 0 then arr.[iy, ix + xLength - mx]
+                    else if ix - mx >= xLength then arr.[iy, (ix - mx) % xLength]
+                    else arr.[iy, ix - mx]
                 )                      
             | _ -> arr
     let translateY<'T> (mode: Mode) (zero: 'T) (o: int) (arr: 'T[,]) =
         match mode with
-            | Zero -> arr |> Array2D.mapi (fun ix iy _ ->
+            | Zero -> arr |> Array2D.mapi (fun iy ix _ ->
                     if
                         iy - o < 0 ||
-                        iy - o >= Array2D.length2 arr
+                        iy - o >= Array2D.length1 arr
                     then zero
-                    else arr.[ix, iy - o]
+                    else arr.[iy - o, ix]
                 )
-            | Donut -> arr |> Array2D.mapi (fun ix iy _ ->
-                    if iy - o < 0 then arr.[ix, (Array2D.length2 arr + iy - o) % Array2D.length2 arr]
-                    else if iy - o >= Array2D.length2 arr then arr.[ix, (iy - o) % Array2D.length2 arr]
-                    else arr.[ix, iy - o]
+            | Donut -> arr |> Array2D.mapi (fun iy ix _ ->            
+                    let yLength = Array2D.length2 arr
+                    let my = o % yLength
+                    if iy - my < 0 then arr.[iy + yLength - my, ix]
+                    else if iy - my >= yLength then arr.[(iy - my) % yLength, ix]
+                    else arr.[iy - my, ix]
                 )                      
             | _ -> arr
     let translate<'T> (mode: Mode) (zero: 'T) (x: int, y: int) = translateX mode zero y >> translateY mode zero x
