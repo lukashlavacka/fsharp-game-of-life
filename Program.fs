@@ -7,25 +7,37 @@ module Array2D =
     type Mode = Zero | Donut | CylinderX | CylinderY
     let flatten<'T> = Seq.cast<'T> >> Seq.toArray
     let toArray<'T> (arr: 'T[,]) = Array.init (Array2D.length1 arr) (fun i -> arr.[i, *] )
-    let translate<'T> (mode: Mode) (zero: 'T) (x: int, y: int) (arr: 'T[,]) =
+    let translateX<'T> (mode: Mode) (zero: 'T) (o: int) (arr: 'T[,]) =
         match mode with
-            | Zero -> arr |> Array2D.mapi (fun iy ix _ ->
+            | Zero -> arr |> Array2D.mapi (fun ix iy _ ->
                     if
-                        ix - x < 0 ||
-                        ix - x >= Array2D.length1 arr ||
-                        iy - y < 0 ||
-                        iy - y >= Array2D.length2 arr
+                        ix - o < 0 ||
+                        ix - o >= Array2D.length1 arr
                     then zero
-                    else arr.[ix - x, iy - y]
+                    else arr.[ix - o, iy]
                 )
-            | Donut -> arr |> Array2D.mapi (fun iy ix _ ->
-                    if ix - x < 0 then arr.[Array2D.length1 arr + ix - x, iy - y]
-                    else if ix - x >= Array2D.length1 arr then arr.[(ix - x) % Array2D.length1 arr, iy - y]
-                    else if iy - y < 0 then arr.[ix - x, Array2D.length2 arr + iy - y]
-                    else if iy - y >= Array2D.length2 arr then arr.[ix - x, (iy - y) % Array2D.length2 arr]
-                    else arr.[ix - x, iy - y]
+            | Donut -> arr |> Array2D.mapi (fun ix iy _ ->
+                    if ix - o < 0 then arr.[Array2D.length1 arr + ix - o, iy]
+                    else if ix - o >= Array2D.length1 arr then arr.[(ix - o) % Array2D.length1 arr, iy]
+                    else arr.[ix - o, iy]
                 )                      
             | _ -> arr
+    let translateY<'T> (mode: Mode) (zero: 'T) (o: int) (arr: 'T[,]) =
+        match mode with
+            | Zero -> arr |> Array2D.mapi (fun ix iy _ ->
+                    if
+                        iy - o < 0 ||
+                        iy - o >= Array2D.length2 arr
+                    then zero
+                    else arr.[ix, iy - o]
+                )
+            | Donut -> arr |> Array2D.mapi (fun ix iy _ ->
+                    if iy - o < 0 then arr.[ix, Array2D.length2 arr + iy - o]
+                    else if iy - o >= Array2D.length2 arr then arr.[ix, (iy - o) % Array2D.length2 arr]
+                    else arr.[ix, iy - o]
+                )                      
+            | _ -> arr
+    let translate<'T> (mode: Mode) (zero: 'T) (x: int, y: int) = translateX mode zero y >> translateY mode zero x
 
 module Pretty =
     let cell = function
@@ -55,11 +67,18 @@ let world: World = initRandomWorld 3 3
 [<EntryPoint>]
 let main argv: int =
     world
-        |> Array2D.translate Array2D.Mode.Donut Dead (0,0)
         |> Pretty.world true
         |> printfn "%O"
     world
-        |> Array2D.translate Array2D.Mode.Donut Dead (0,-1)
+        |> Array2D.translate Array2D.Mode.Donut Dead (1,0)
+        |> Pretty.world true
+        |> printfn "%O"
+    world
+        |> Array2D.translate Array2D.Mode.Donut Dead (0,1)
+        |> Pretty.world true
+        |> printfn "%O"
+    world
+        |> Array2D.translate Array2D.Mode.Donut Dead (1,1)
         |> Pretty.world true
         |> printfn "%O"
     0 // return an integer exit code
