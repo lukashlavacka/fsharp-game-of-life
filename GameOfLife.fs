@@ -45,7 +45,9 @@ type World(w: Cell[,]) =
     member this.World = w
     member this.Length1 = Array2D.length1 w
     member this.Length2 = Array2D.length2 w
-    member this.Pad (padSize: int) (padWith: Cell): World =
+    member this.CloneWith (c: Cell) =
+        Array2D.create this.Length1 this.Length2 c |> World
+    static member Pad (padSize: int) (padWith: Cell) (this: World): World =
         Array2D.init (this.Length1 + 2 * padSize) (this.Length2 + 2 * padSize) (fun x y ->
             if x < padSize || y < padSize || x >= (this.Length1 + padSize) || y >= (this.Length2 + padSize)
             then padWith
@@ -54,6 +56,9 @@ type World(w: Cell[,]) =
         |> World
     static member Create x y v =
         Array2D.create x y v |> World
+    static member CreateRandom x y =
+        let rnd = Random()
+        Array2D.init x y (fun x y -> if rnd.Next(2) > 0 then 1 else 0) |> World
     static member (+) (this: World, other: World): World =
        this.World
         |> Array2D.mapi (fun x y c -> c + other.World.[x,y])
@@ -62,9 +67,6 @@ type World(w: Cell[,]) =
        this.World
         |> Array2D.mapi (fun x y c -> c + other.World.[x,y])
         |> World
-    // static member (*) (this: World, power: int): World =
-    //     this
-    //     |> life
     static member AndInt (other: int) (this: World): World =
         this.World
         |> Array2D.map (fun v -> if v = other then 1 else 0)        
@@ -97,16 +99,11 @@ module Pretty =
         (if isPretty then (Array.fold (fun c _ -> c + "_") "_" w.World.[0,*]) + "_\n" else "") +
         (w.World |> Array2D.toArray |> Array.map (row isPretty) |> String.concat "\n") +
         (if isPretty then "\n_" + (Array.fold (fun c _ -> c + "_") "_" w.World.[0,*]) else "")
+    let worlds (isPretty: bool) (ws: World[]) =
+        ws |> Array.map (world isPretty) |> String.concat("\n")
 
-let initRandomWorld x y: World = 
-    let rnd = Random()
-    World(Array2D.init x y (fun x y -> if rnd.Next(2) > 0 then 1 else 0))
 
-/// <summary>Given the 3x3 neighbourhood determines if the center should be 1</summary>
-let is1 (neighbors: Cell[,]): Cell =
-    match neighbors |> Array2D.flatten |> Array.toList |> List.sumBy (fun cell -> if cell = 1 then 1 else 0) with
-        | 4 | 5 -> 1
-        | _ -> 0
+
 
 #nowarn "0058"
 let life (mode: Array2D.Mode) (w: World) =
@@ -125,7 +122,7 @@ let life (mode: Array2D.Mode) (w: World) =
             |])
             |> Array.reduce (+)
         ))
-    |> Array.zip [| World.Create w.Length1 w.Length2 1; w |]
+    |> Array.zip [| w.CloneWith 1; w |]
     |> Array.map (fun (a, b) -> a &&& b)
     |> Array.reduce (|||)
 #warn "0058"
