@@ -242,9 +242,34 @@ module ``pretty`` =
         let actual = input |> Pretty.world true
         Assert.Equal(expected, actual)
 
-// module ``life `` =
-//     [<Fact>]
-//     let ``evolution zero`` () =
-//         let input = World([[1; 0; 1];[1; 0; 1];[1; 0; 1]])
-//         let expected = "x"
-//         let actual = input |> Pretty.cell true
+module ``life`` =
+    [<Fact>]
+    let `` evolution one`` () =
+        let input = World(array2D [[0;0;0;0;0];[0;0;0;0;0];[0;1;1;1;0];[0;0;0;0;0];[0;0;0;0;0]])
+        let expected = World(array2D [[0;0;0;0;0];[0;0;1;0;0];[0;0;1;0;0];[0;0;1;0;0];[0;0;0;0;0]])
+        let actual = input |> life Array2D.Mode.Zero
+        Assert.Equal(expected.World, actual.World)
+    [<Fact>]
+    let `` evolution two`` () =
+        let input = World(array2D [[0;0;0;0;0];[0;0;0;0;0];[0;1;1;1;0];[0;0;0;0;0];[0;0;0;0;0]])
+        let expected = World(array2D [[0;0;0;0;0];[0;0;0;0;0];[0;1;1;1;0];[0;0;0;0;0];[0;0;0;0;0]])
+        let actual = input |> life Array2D.Mode.Zero |> life Array2D.Mode.Zero
+        Assert.Equal(expected.World, actual.World)
+    [<Fact>]
+    let `` evolution Donut one`` () =
+        let input = World(array2D [[1;1;0;0;1];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0]])
+        let expected = World(array2D [[1;0;0;0;0];[1;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[1;0;0;0;0]])
+        let actual = input |> life Array2D.Mode.Donut
+        Assert.Equal(expected.World, actual.World)
+    [<Fact>]
+    let `` evolution Donut two`` () =
+        let input = World(array2D [[1;0;0;1;1];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0]])
+        let expected = World(array2D [[1;0;0;1;1];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0]])
+        let actual = input |> life Array2D.Mode.Donut |> life Array2D.Mode.Donut
+        Assert.Equal(expected.World, actual.World)
+    [<Fact>]
+    let ``Rec two works`` () =
+        let input = World(array2D [[0;0;0;0;0];[0;0;0;0;0];[0;1;1;1;0];[0;0;0;0;0];[0;0;0;0;0]])
+        let expected = input |> life Array2D.Mode.Zero |> life Array2D.Mode.Zero
+        let actual = input |> lifeRec Array2D.Mode.Zero 2
+        Assert.Equal(expected.World, actual.World)

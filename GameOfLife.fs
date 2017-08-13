@@ -8,38 +8,36 @@ module Array2D =
     let toArray<'T> (arr: 'T[,]) = Array.init (Array2D.length1 arr) (fun i -> arr.[i, *] )
     let translateX<'T> (mode: Mode) (zero: 'T) (o: int) (arr: 'T[,]) =
         match mode with
-            | Zero -> arr |> Array2D.mapi (fun iy ix _ ->
+            | Zero | CylinderY -> arr |> Array2D.mapi (fun iy ix _ ->
                     if
                         ix - o < 0 ||
                         ix - o >= Array2D.length2 arr
                     then zero
                     else arr.[iy, ix - o]
                 )
-            | Donut -> arr |> Array2D.mapi (fun iy ix _ ->
+            | Donut | CylinderX -> arr |> Array2D.mapi (fun iy ix _ ->
                     let xLength = Array2D.length1 arr
                     let mx = o % xLength
                     if ix - mx < 0 then arr.[iy, ix + xLength - mx]
                     else if ix - mx >= xLength then arr.[iy, (ix - mx) % xLength]
                     else arr.[iy, ix - mx]
-                )                      
-            | _ -> arr
+                )
     let translateY<'T> (mode: Mode) (zero: 'T) (o: int) (arr: 'T[,]) =
         match mode with
-            | Zero -> arr |> Array2D.mapi (fun iy ix _ ->
+            | Zero | CylinderX -> arr |> Array2D.mapi (fun iy ix _ ->
                     if
                         iy - o < 0 ||
                         iy - o >= Array2D.length1 arr
                     then zero
                     else arr.[iy - o, ix]
                 )
-            | Donut -> arr |> Array2D.mapi (fun iy ix _ ->            
+            | Donut | CylinderY -> arr |> Array2D.mapi (fun iy ix _ ->            
                     let yLength = Array2D.length2 arr
                     let my = o % yLength
                     if iy - my < 0 then arr.[iy + yLength - my, ix]
                     else if iy - my >= yLength then arr.[(iy - my) % yLength, ix]
                     else arr.[iy - my, ix]
-                )                      
-            | _ -> arr
+                )
     let translate<'T> (mode: Mode) (zero: 'T) (x: int, y: int) = translateX mode zero y >> translateY mode zero x
 
 type Cell = int
