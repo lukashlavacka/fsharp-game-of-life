@@ -194,50 +194,57 @@ module ``Array2D translate`` =
 
 module ``pretty`` =
     [<Fact>]
-    let ``cell alive pretty works`` () =
-        let input = Alive
-        let expected = "■"
+    let ``cell 1 pretty works`` () =
+        let input = 1
+        let expected = "x"
         let actual = input |> Pretty.cell true
         Assert.Equal(expected, actual)
     [<Fact>]
-    let ``cell alive unpretty works`` () =
-        let input = Alive
+    let ``cell 1 unpretty works`` () =
+        let input = 1
         let expected = "1"
         let actual = input |> Pretty.cell false
         Assert.Equal(expected, actual)
     [<Fact>]
-    let ``cell dead pretty works`` () =
-        let input = Dead
+    let ``cell 0 pretty works`` () =
+        let input = 0
         let expected = " "
         let actual = input |> Pretty.cell true
         Assert.Equal(expected, actual)
     [<Fact>]
-    let ``cell dead unpretty works`` () =
-        let input = Dead
+    let ``cell 0 unpretty works`` () =
+        let input = 0
         let expected = "0"
         let actual = input |> Pretty.cell false
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``row unpretty works`` () =
-        let input = [| Alive; Dead; Alive |]
+        let input = [| 1; 0; 1 |]
         let expected = "101"
         let actual = input |> Pretty.row false
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``row pretty works`` () =
-        let input = [| Alive; Dead; Alive |]
-        let expected = "|■ ■|"
+        let input = [| 1; 0; 1 |]
+        let expected = "|x x|"
         let actual = input |> Pretty.row true
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``world unpretty works`` () =
-        let input = array2D [[Alive; Dead; Alive];[Alive; Dead; Alive];[Alive; Dead; Alive]]
+        let input = World(array2D [[1; 0; 1];[1; 0; 1];[1; 0; 1]])
         let expected = "101\n101\n101"
         let actual = input |> Pretty.world false
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``world pretty works`` () =
-        let input = array2D [[Alive; Dead; Alive];[Alive; Dead; Alive];[Alive; Dead; Alive]]
-        let expected = "_____\n|■ ■|\n|■ ■|\n|■ ■|\n‾‾‾‾‾"
+        let input = World(array2D [[1; 0; 1];[1; 0; 1];[1; 0; 1]])
+        let expected = "_____\n|x x|\n|x x|\n|x x|\n_____"
         let actual = input |> Pretty.world true
         Assert.Equal(expected, actual)
+
+// module ``life `` =
+//     [<Fact>]
+//     let ``evolution zero`` () =
+//         let input = World([[1; 0; 1];[1; 0; 1];[1; 0; 1]])
+//         let expected = "x"
+//         let actual = input |> Pretty.cell true
