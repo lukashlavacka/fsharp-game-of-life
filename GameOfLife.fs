@@ -46,18 +46,19 @@ module Array2D =
     let translate<'T> (mode: Mode) (zero: 'T) (x: int, y: int) = translateX mode zero y >> translateY mode zero x
 
 module Pretty =
-    let cell = function
-        | Alive -> "1"
-        | _ -> "0"
-    let row (pretty: bool) (r: Cell[]) = 
-        (if pretty then "|" else "") +
-        (r |> Array.map cell |> String.concat "") +        
-        (if pretty then "|" else "")
-    let world (pretty: bool) (w: World) =
-        (if pretty then (Array.fold (fun c _ -> c + "_") "_" w.[0,*]) + "_\n" else "") +
-        (w |> Array2D.toArray |> Array.map (row pretty) |> String.concat "\n") +
-        (if pretty then "\n‾" + (Array.fold (fun c _ -> c + "‾") "‾" w.[0,*]) else "")
-       
+    let cell (isPretty: bool) (c: Cell) =
+        match c with
+            | Alive -> if isPretty then "■" else "1"
+            | _ ->  if isPretty then " " else "0"
+    let row (isPretty: bool) (r: Cell[]) = 
+        (if isPretty then "|" else "") +
+        (r |> Array.map (cell isPretty) |> String.concat "") +        
+        (if isPretty then "|" else "")
+    let world (isPretty: bool) (w: World) =
+        (if isPretty then (Array.fold (fun c _ -> c + "_") "_" w.[0,*]) + "_\n" else "") +
+        (w |> Array2D.toArray |> Array.map (row isPretty) |> String.concat "\n") +
+        (if isPretty then "\n‾" + (Array.fold (fun c _ -> c + "‾") "‾" w.[0,*]) else "")
+
 let initRandomWorld x y: World = 
     let rnd = Random()
     Array2D.init x y (fun x y -> if rnd.Next(2) > 0 then Alive else Dead)

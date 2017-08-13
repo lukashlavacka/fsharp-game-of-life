@@ -192,18 +192,30 @@ module ``Array2D translate`` =
         let actual = input |> Array2D.translateY Array2D.Mode.Donut 0 -4
         Assert.Equal(expected, actual)
 
-module ``Pretty `` =
+module ``pretty`` =
     [<Fact>]
-    let ``cell alive works`` () =
+    let ``cell alive pretty works`` () =
         let input = Alive
-        let expected = "1"
-        let actual = input |> Pretty.cell
+        let expected = "■"
+        let actual = input |> Pretty.cell true
         Assert.Equal(expected, actual)
     [<Fact>]
-    let ``cell dead works`` () =
+    let ``cell alive unpretty works`` () =
+        let input = Alive
+        let expected = "1"
+        let actual = input |> Pretty.cell false
+        Assert.Equal(expected, actual)
+    [<Fact>]
+    let ``cell dead pretty works`` () =
+        let input = Dead
+        let expected = " "
+        let actual = input |> Pretty.cell true
+        Assert.Equal(expected, actual)
+    [<Fact>]
+    let ``cell dead unpretty works`` () =
         let input = Dead
         let expected = "0"
-        let actual = input |> Pretty.cell
+        let actual = input |> Pretty.cell false
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``row unpretty works`` () =
@@ -214,7 +226,7 @@ module ``Pretty `` =
     [<Fact>]
     let ``row pretty works`` () =
         let input = [| Alive; Dead; Alive |]
-        let expected = "|101|"
+        let expected = "|■ ■|"
         let actual = input |> Pretty.row true
         Assert.Equal(expected, actual)
     [<Fact>]
@@ -226,6 +238,6 @@ module ``Pretty `` =
     [<Fact>]
     let ``world pretty works`` () =
         let input = array2D [[Alive; Dead; Alive];[Alive; Dead; Alive];[Alive; Dead; Alive]]
-        let expected = "_____\n|101|\n|101|\n|101|\n‾‾‾‾‾"
+        let expected = "_____\n|■ ■|\n|■ ■|\n|■ ■|\n‾‾‾‾‾"
         let actual = input |> Pretty.world true
         Assert.Equal(expected, actual)
