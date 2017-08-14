@@ -3,12 +3,12 @@ module GameOfLife
 open System
 
 module Array2D =
-    type Mode = Zero | Donut | CylinderX | CylinderY
+    type Mode = Zero | Donut | CylinderX | CylinderY | MoebiusX | MoebiusY
     let flatten<'T> (arr: 'T[,]) = arr |> Seq.cast<'T> |> Seq.toArray
     let toArray<'T> (arr: 'T[,]) = Array.init (Array2D.length1 arr) (fun i -> arr.[i, *] )
     let translateX<'T> (mode: Mode) (zero: 'T) (o: int) (arr: 'T[,]) =
         match mode with
-            | Zero | CylinderY -> arr |> Array2D.mapi (fun iy ix _ ->
+            | Zero | CylinderY | MoebiusY -> arr |> Array2D.mapi (fun iy ix _ ->
                     if
                         ix - o < 0 ||
                         ix - o >= Array2D.length2 arr
@@ -22,9 +22,23 @@ module Array2D =
                     else if ix - mx >= xLength then arr.[iy, (ix - mx) % xLength]
                     else arr.[iy, ix - mx]
                 )
+            | MoebiusX -> arr |> Array2D.mapi (fun iy ix _ ->
+                    let xLength = Array2D.length1 arr
+                    let yLength = Array2D.length2 arr
+                    let mx = o % xLength
+                    let doubleLoop = (o / xLength) % 2 = 1
+                    if doubleLoop then
+                        if ix - mx < 0 then arr.[iy, ix + xLength - mx]
+                        else if ix - mx >= xLength then arr.[iy, (ix - mx) % xLength]
+                        else arr.[iy, ix - mx]
+                    else
+                        if ix - mx < 0 then arr.[yLength - iy - 1, ix + xLength - mx]
+                        else if ix - mx >= xLength then arr.[yLength - iy - 1, (ix - mx) % xLength]
+                        else arr.[iy, ix - mx]
+                )            
     let translateY<'T> (mode: Mode) (zero: 'T) (o: int) (arr: 'T[,]) =
         match mode with
-            | Zero | CylinderX -> arr |> Array2D.mapi (fun iy ix _ ->
+            | Zero | CylinderX | MoebiusX -> arr |> Array2D.mapi (fun iy ix _ ->
                     if
                         iy - o < 0 ||
                         iy - o >= Array2D.length1 arr
@@ -37,6 +51,20 @@ module Array2D =
                     if iy - my < 0 then arr.[iy + yLength - my, ix]
                     else if iy - my >= yLength then arr.[(iy - my) % yLength, ix]
                     else arr.[iy - my, ix]
+                )
+            | MoebiusY -> arr |> Array2D.mapi (fun iy ix _ -> 
+                    let xLength = Array2D.length1 arr           
+                    let yLength = Array2D.length2 arr
+                    let my = o % yLength
+                    let doubleLoop = (o / yLength) % 2 = 1
+                    if doubleLoop then
+                        if iy - my < 0 then arr.[iy + yLength - my, ix]
+                        else if iy - my >= yLength then arr.[(iy - my) % yLength, ix]
+                        else arr.[iy - my, ix]
+                    else     
+                        if iy - my < 0 then arr.[iy + yLength - my, xLength - ix - 1]
+                        else if iy - my >= yLength then arr.[(iy - my) % yLength, xLength - ix - 1]
+                        else arr.[iy - my, ix]               
                 )
     let translate<'T> (mode: Mode) (zero: 'T) (x: int, y: int) = translateX mode zero y >> translateY mode zero x
 

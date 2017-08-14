@@ -213,6 +213,30 @@ module ``Array2D translate`` =
         let expected = array2D [[0;0;0];[3;1;2];[6;4;5]]
         let actual = input |> Array2D.translate Array2D.Mode.CylinderX 0 (1, 1)
         Assert.Equal(expected, actual)
+    [<Fact>]
+    let ``X moebiusX works`` () =
+        let input = array2D [[1;2;3];[4;5;6];[7;8;9]]
+        let expected = array2D [[9;1;2];[6;4;5];[3;7;8]]
+        let actual = input |> Array2D.translateX Array2D.Mode.MoebiusX 0 1
+        Assert.Equal(expected, actual)
+    [<Fact>]
+    let ``X moebiusX double loop works`` () =
+        let input = array2D [[1;2;3];[4;5;6];[7;8;9]]
+        let expected = array2D [[3;1;2];[6;4;5];[9;7;8]]
+        let actual = input |> Array2D.translateX Array2D.Mode.CylinderX 0 4
+        Assert.Equal(expected, actual)
+    [<Fact>]
+    let ``Y moebiusY works`` () =
+        let input = array2D [[1;2;3];[4;5;6];[7;8;9]]
+        let expected = array2D [[9;8;7];[1;2;3];[4;5;6]]
+        let actual = input |> Array2D.translateY Array2D.Mode.MoebiusY 0 1
+        Assert.Equal(expected, actual)
+    [<Fact>]
+    let ``Y moebiusY double loop works`` () =
+        let input = array2D [[1;2;3];[4;5;6];[7;8;9]]
+        let expected = array2D [[7;8;9];[1;2;3];[4;5;6]]
+        let actual = input |> Array2D.translateY Array2D.Mode.CylinderY 0 4
+        Assert.Equal(expected, actual)
 
 module ``pretty`` =
     [<Fact>]
