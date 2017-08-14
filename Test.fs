@@ -45,21 +45,6 @@ module ``Array2D translate`` =
         let actual2 = actual1 |> Array2D.translate Array2D.Mode.Donut 1 (-1,0)
         Assert.Equal(input, actual2)
 
-
-    [<Fact>]
-    let ``larger than size`` () =
-        let input = array2D [[1;2;3];[4;5;6];[7;8;9]]
-        let actual1 = input |> Array2D.translate Array2D.Mode.Donut 1 (1,0)
-        let actual2 = input |> Array2D.translate Array2D.Mode.Donut 1 (7,0)
-        Assert.Equal(actual1, actual2)
-
-    [<Fact>]
-    let ``negative larger than size`` () =
-        let input = array2D [[1;2;3];[4;5;6];[7;8;9]]
-        let actual1 = input |> Array2D.translate Array2D.Mode.Donut 1 (-1,0)
-        let actual2 = input |> Array2D.translate Array2D.Mode.Donut 1 (-7,0)
-        Assert.Equal(actual1, actual2)
-
     [<Fact>]
     let ``X zero does nothing`` () =
         let input = array2D [[1;2;3];[4;5;6];[7;8;9]]
@@ -190,6 +175,43 @@ module ``Array2D translate`` =
         let input = array2D [[1;2;3];[4;5;6];[7;8;9]]
         let expected = array2D [[4;5;6];[7;8;9];[1;2;3]]
         let actual = input |> Array2D.translateY Array2D.Mode.Donut 0 -4
+        Assert.Equal(expected, actual)
+
+    [<Fact>]
+    let ``Y cylinderY works`` () =
+        let input = array2D [[1;2;3];[4;5;6];[7;8;9]]
+        let expected = array2D [[7;8;9];[1;2;3];[4;5;6]]
+        let actual = input |> Array2D.translateY Array2D.Mode.CylinderY 0 1
+        Assert.Equal(expected, actual)
+    [<Fact>]
+    let ``Y cylinderX works`` () =
+        let input = array2D [[1;2;3];[4;5;6];[7;8;9]]
+        let expected = array2D [[0;0;0];[1;2;3];[4;5;6]]
+        let actual = input |> Array2D.translateY Array2D.Mode.CylinderX 0 1
+        Assert.Equal(expected, actual)
+    [<Fact>]
+    let ``X cylinderY works`` () =
+        let input = array2D [[1;2;3];[4;5;6];[7;8;9]]
+        let expected = array2D [[0;1;2];[0;4;5];[0;7;8]]
+        let actual = input |> Array2D.translateX Array2D.Mode.CylinderY 0 1
+        Assert.Equal(expected, actual)
+    [<Fact>]
+    let ``X cylinderX works`` () =
+        let input = array2D [[1;2;3];[4;5;6];[7;8;9]]
+        let expected = array2D [[3;1;2];[6;4;5];[9;7;8]]
+        let actual = input |> Array2D.translateX Array2D.Mode.CylinderX 0 1
+        Assert.Equal(expected, actual)
+    [<Fact>]
+    let ``cylinderY works`` () =
+        let input = array2D [[1;2;3];[4;5;6];[7;8;9]]
+        let expected = array2D [[0;7;8];[0;1;2];[0;4;5]]
+        let actual = input |> Array2D.translate Array2D.Mode.CylinderY 0 (1, 1)
+        Assert.Equal(expected, actual)
+    [<Fact>]
+    let ``cylinderX works`` () =
+        let input = array2D [[1;2;3];[4;5;6];[7;8;9]]
+        let expected = array2D [[0;0;0];[3;1;2];[6;4;5]]
+        let actual = input |> Array2D.translate Array2D.Mode.CylinderX 0 (1, 1)
         Assert.Equal(expected, actual)
 
 module ``pretty`` =
