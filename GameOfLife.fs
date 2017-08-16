@@ -67,6 +67,18 @@ module Array2D =
                         else arr.[iy - my, ix]               
                 )
     let translate<'T> (mode: Mode) (zero: 'T) (x: int, y: int) = translateX mode zero y >> translateY mode zero x
+    let insertAt<'T> (src: 'T[,]) (x: int, y: int) (dst: 'T[,]) =
+        Array2D.init (Array2D.length1 dst) (Array2D.length2 dst) (fun ix iy -> 
+            if ix >= x && ix < (x + Array2D.length1 src) && iy >= y && iy < (y + Array2D.length2 src)
+            then src.[ix - x, iy - y]
+            else dst.[ix, iy]
+        )
+    let pad<'T> (padSize: int) (padWith: 'T) (arr: 'T[,]) =
+        Array2D.init ( Array2D.length1 arr + 2 * padSize) (Array2D.length2 arr + 2 * padSize) (fun x y ->
+            if x < padSize || y < padSize || x >= (Array2D.length1 arr + padSize) || y >= (Array2D.length2 arr + padSize)
+            then padWith
+            else arr.[x - padSize, y-padSize]
+        )
 
 type Cell = int
 type World(w: Cell[,]) =
@@ -158,3 +170,6 @@ let life (mode: Array2D.Mode) (w: World) =
 let rec lifeRec (mode: Array2D.Mode) (i: int) (w: World) =
     if i < 1 then w
     else lifeRec mode (i - 1) (life mode w)
+
+module Common =
+    let glider = array2D [[0;0;1];[1;0;1];[0;1;1]]
