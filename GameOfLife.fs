@@ -3,10 +3,10 @@ module GameOfLife
 open System
 
 module Array2D =
-    type Mode = Zero | Donut | CylinderX | CylinderY | MoebiusX | MoebiusY
+    type TranslateMode = Zero | Donut | CylinderX | CylinderY | MoebiusX | MoebiusY
     let flatten<'T> (arr: 'T[,]) = arr |> Seq.cast<'T> |> Seq.toArray
     let toArray<'T> (arr: 'T[,]) = Array.init (Array2D.length1 arr) (fun i -> arr.[i, *] )
-    let translateX<'T> (mode: Mode) (zero: 'T) (o: int) (arr: 'T[,]) =
+    let translateX<'T> (mode: TranslateMode) (zero: 'T) (o: int) (arr: 'T[,]) =
         match mode with
             | Zero | CylinderY | MoebiusY -> arr |> Array2D.mapi (fun iy ix _ ->
                     if
@@ -36,7 +36,7 @@ module Array2D =
                         else if ix - mx >= xLength then arr.[yLength - iy - 1, (ix - mx) % xLength]
                         else arr.[iy, ix - mx]
                 )            
-    let translateY<'T> (mode: Mode) (zero: 'T) (o: int) (arr: 'T[,]) =
+    let translateY<'T> (mode: TranslateMode) (zero: 'T) (o: int) (arr: 'T[,]) =
         match mode with
             | Zero | CylinderX | MoebiusX -> arr |> Array2D.mapi (fun iy ix _ ->
                     if
@@ -66,7 +66,7 @@ module Array2D =
                         else if iy - my >= yLength then arr.[(iy - my) % yLength, xLength - ix - 1]
                         else arr.[iy - my, ix]               
                 )
-    let translate<'T> (mode: Mode) (zero: 'T) (x: int, y: int) = translateX mode zero y >> translateY mode zero x
+    let translate<'T> (mode: TranslateMode) (zero: 'T) (x: int, y: int) = translateX mode zero y >> translateY mode zero x
     let insertAt<'T> (src: 'T[,]) (x: int, y: int) (dst: 'T[,]) =
         Array2D.init (Array2D.length1 dst) (Array2D.length2 dst) (fun ix iy -> 
             if ix >= x && ix < (x + Array2D.length1 src) && iy >= y && iy < (y + Array2D.length2 src)
@@ -79,54 +79,39 @@ module Array2D =
             then padWith
             else arr.[x - padSize, y-padSize]
         )
+    let initRandom (x: int) (y: int) (randomMax: int) (r: int -> 'T) =
+        let rnd = Random()
+        Array2D.init x y (fun x y -> r (rnd.Next(randomMax)) )   
+    let cloneWith (w: 'T) (arr: 'T[,]) =
+        arr
+            |> Array2D.map (fun _ -> w)
+    let toOne (zero: 'T) (one: 'T) (arr: 'T[,]) =
+        arr |>
+            Array2D.map (fun v -> if v = zero then v else one )
+    let zip (arr1: 'T[,]) (arr2: 'T[,]) =
+        arr1 |>
+            Array2D.mapi (fun x y c -> (c, arr2.[x,y]))
+    let add (arr1: 'T[,]) (arr2: 'T[,]) =
+        arr1 |>
+            Array2D.mapi (fun x y c -> c + arr2.[x,y])
+    // let andAnother (cmp: 'T -> 'T -> 'T) (arr1: 'T[,]) (arr2: 'T[,]) =
+    //     arr1 |>
+    //         Array2D.mapi (fun x y c -> cmp c arr2.[x,y])
+    let andAnother (zero: 'T) (trueVal: 'T) (arr1: 'T[,]) (arr2: 'T[,]) =
+        arr1 |>
+            Array2D.mapi (fun x y c -> if c <> zero && arr2.[x,y] <> zero then trueVal else zero)
+    let andAnotherTuple (zero: 'T) (trueVal: 'T) (arr1: 'T[,], arr2: 'T[,]) =
+        arr1 |>
+            Array2D.mapi (fun x y c -> if c <> zero && arr2.[x,y] <> zero then trueVal else zero)
+    let andVal (zero: 'T) (trueVal: 'T) (cmp: 'T) (arr1: 'T[,]) =
+        arr1 |>
+            Array2D.mapi (fun x y c -> if c = cmp then trueVal else zero)
+    let orAnother (zero: 'T) (trueVal: 'T) (arr1: 'T[,]) (arr2: 'T[,]) =
+        arr1 |>
+            Array2D.mapi (fun x y c -> if c = zero && arr2.[x,y] = zero then zero else trueVal)
 
 type Cell = int
-type World(w: Cell[,]) =
-    member this.World = w
-    member this.Length1 = Array2D.length1 w
-    member this.Length2 = Array2D.length2 w
-    member this.CloneWith (c: Cell) =
-        Array2D.create this.Length1 this.Length2 c |> World
-    static member Pad (padSize: int) (padWith: Cell) (this: World): World =
-        Array2D.init (this.Length1 + 2 * padSize) (this.Length2 + 2 * padSize) (fun x y ->
-            if x < padSize || y < padSize || x >= (this.Length1 + padSize) || y >= (this.Length2 + padSize)
-            then padWith
-            else this.World.[x - padSize, y-padSize]
-        )
-        |> World
-    static member Create x y v =
-        Array2D.create x y v |> World
-    static member CreateRandom x y =
-        let rnd = Random()
-        Array2D.init x y (fun x y -> if rnd.Next(2) > 0 then 1 else 0) |> World
-    static member (+) (this: World, other: World): World =
-       this.World
-        |> Array2D.mapi (fun x y c -> c + other.World.[x,y])
-        |> World
-    static member (~+) (this: World, other: World): World =
-       this.World
-        |> Array2D.mapi (fun x y c -> c + other.World.[x,y])
-        |> World
-    static member AndInt (other: int) (this: World): World =
-        this.World
-        |> Array2D.map (fun v -> if v = other then 1 else 0)        
-        |> World
-    static member (&&&) (this: World, other: int): World =
-        this.World
-        |> Array2D.mapi (fun x y c -> if c = other then 1 else 0 )        
-        |> World
-    static member (&&&) (other: int, this: World): World =
-        this.World
-        |> Array2D.mapi (fun x y c -> if c = other then 1 else 0 )        
-        |> World
-    static member (&&&) (this: World, other: World): World =
-        this.World
-        |> Array2D.mapi (fun x y c -> if c > 0 && c = other.World.[x,y] then 1 else 0 )        
-        |> World
-    static member (|||) (this: World, other: World): World =
-        this.World
-        |> Array2D.mapi (fun x y c -> if c > 0 || other.World.[x,y] > 0 then 1 else 0 )        
-        |> World
+type World = Cell[,]
 
 module Pretty =
     let cell (isPretty: bool) (c: Cell) =
@@ -136,40 +121,41 @@ module Pretty =
         (r |> Array.map (cell isPretty) |> String.concat "") +        
         (if isPretty then "|" else "")
     let world (isPretty: bool) (w: World) =
-        (if isPretty then (Array.fold (fun c _ -> c + "_") "_" w.World.[0,*]) + "_\n" else "") +
-        (w.World |> Array2D.toArray |> Array.map (row isPretty) |> String.concat "\n") +
-        (if isPretty then "\n_" + (Array.fold (fun c _ -> c + "_") "_" w.World.[0,*]) else "")
+        (if isPretty then (Array.fold (fun c _ -> c + "_") "_" w.[0,*]) + "_\n" else "") +
+        (w |> Array2D.toArray |> Array.map (row isPretty) |> String.concat "\n") +
+        (if isPretty then "\n_" + (Array.fold (fun c _ -> c + "_") "_" w.[0,*]) else "")
     let worlds (isPretty: bool) (ws: World[]) =
         ws |> Array.map (world isPretty) |> String.concat("\n")
 
-
-
-
 #nowarn "0058"
-let life (mode: Array2D.Mode) (w: World) =
-    [|3;4|]
-    |> Array.map (fun i -> World.AndInt i (
-            (Array.map ((Array2D.translate mode 0) >> ((fun f -> f w.World) >> World)) [|
-                (-1,-1);
-                (-1, 0);
-                (-1, 1);
-                ( 0,-1);
-                ( 0, 0);
-                ( 0, 1);
-                ( 1,-1);
-                ( 1, 0);
-                ( 1, 1);
-            |])
-            |> Array.reduce (+)
-        ))
-    |> Array.zip [| w.CloneWith 1; w |]
-    |> Array.map (fun (a, b) -> a &&& b)
-    |> Array.reduce (|||)
-#warn "0058"
+#nowarn "0064"
+module Life =
+    let one (mode: Array2D.TranslateMode) (w: World) =
+        [|3;4|]
+        |> Array.map (fun i -> Array2D.andVal 0 1 i (
+                (Array.map ((Array2D.translate mode 0) >> ((fun f -> f w))) [|
+                    (-1,-1);
+                    (-1, 0);
+                    (-1, 1);
+                    ( 0,-1);
+                    ( 0, 0);
+                    ( 0, 1);
+                    ( 1,-1);
+                    ( 1, 0);
+                    ( 1, 1);
+                |])
+                |> Array.reduce Array2D.add
+            ))
+        |> Array.zip [| Array2D.cloneWith 1 w; w |]
+        |> Array.map (Array2D.andAnotherTuple 0 1)
+        |> Array.reduce (Array2D.orAnother 0 1)
 
-let rec lifeRec (mode: Array2D.Mode) (i: int) (w: World) =
-    if i < 1 then w
-    else lifeRec mode (i - 1) (life mode w)
+
+    let rec recursive (mode: Array2D.TranslateMode) (i: int) (w: World) =
+        if i < 1 then w
+        else recursive mode (i - 1) (one mode w)
+#warn "0058"
+#warn "0064"
 
 module Common =
     let glider = array2D [[0;0;1];[1;0;1];[0;1;1]]
