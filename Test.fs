@@ -17,6 +17,33 @@ module ``Array2D `` =
         let expected = [|[|1;2;3|];[|4;5;6|];[|7;8;9|]|]
         let actual = input |> Array2D.toArray
         Assert.Equal<int[]>(expected, actual)
+    [<Fact>]
+    let ``isEmpty empty`` () =
+        let input = array2D [[0;0;0];[0;0;0];[0;0;0]]
+        let actual = input |> Array2D.isEmpty 0
+        Assert.True(actual)
+    [<Fact>]
+    let ``isEmpty one item`` () =
+        let input = array2D [[0;0;0];[0;0;1];[0;0;0]]
+        let actual = input |> Array2D.isEmpty 0
+        Assert.False(actual)
+    [<Fact>]
+    let ``isEmpty all items`` () =
+        let input = array2D [[1;1;1];[1;1;1];[1;1;1]]
+        let actual = input |> Array2D.isEmpty 0
+        Assert.False(actual)
+    [<Fact>]
+    let ``equals equal`` () =
+        let input1 = array2D [[0;0;0];[0;0;1];[0;0;0]]
+        let input2 = array2D [[0;0;0];[0;0;1];[0;0;0]]
+        let actual = Array2D.equals input1 input2
+        Assert.True(actual)
+    [<Fact>]
+    let ``equals not`` () =
+        let input1 = array2D [[0;0;0];[0;0;1];[0;0;0]]
+        let input2 = array2D [[0;0;1];[0;0;1];[0;0;0]]
+        let actual = Array2D.equals input1 input2
+        Assert.False(actual)
 
 module ``Array2D translate`` =
     [<Fact>]
@@ -63,7 +90,7 @@ module ``Array2D translate`` =
         let expected = array2D [[0;1;2];[0;4;5];[0;7;8]]
         let actual = input |> Array2D.translateX Array2D.TranslateMode.Zero 0 1
         Assert.Equal(expected, actual)
-        
+
     [<Fact>]
     let ``X zero -1`` () =
         let input = array2D [[1;2;3];[4;5;6];[7;8;9]]
@@ -89,7 +116,7 @@ module ``Array2D translate`` =
         let expected = array2D [[0;0;0];[1;2;3];[4;5;6]]
         let actual = input |> Array2D.translateY Array2D.TranslateMode.Zero 0 1
         Assert.Equal(expected, actual)
-        
+
     [<Fact>]
     let ``Y zero -1`` () =
         let input = array2D [[1;2;3];[4;5;6];[7;8;9]]
@@ -115,7 +142,7 @@ module ``Array2D translate`` =
         let expected = array2D [[3;1;2];[06;4;5];[9;7;8]]
         let actual = input |> Array2D.translateX Array2D.TranslateMode.Donut 0 1
         Assert.Equal(expected, actual)
-        
+
     [<Fact>]
     let ``X donut -1`` () =
         let input = array2D [[1;2;3];[4;5;6];[7;8;9]]
@@ -129,7 +156,7 @@ module ``Array2D translate`` =
         let expected = array2D [[3;1;2];[06;4;5];[9;7;8]]
         let actual = input |> Array2D.translateX Array2D.TranslateMode.Donut 0 4
         Assert.Equal(expected, actual)
-        
+
     [<Fact>]
     let ``X donut -4`` () =
         let input = array2D [[1;2;3];[4;5;6];[7;8;9]]
@@ -155,7 +182,7 @@ module ``Array2D translate`` =
         let expected = array2D [[7;8;9];[1;2;3];[4;5;6]]
         let actual = input |> Array2D.translateY Array2D.TranslateMode.Donut 0 1
         Assert.Equal(expected, actual)
-        
+
     [<Fact>]
     let ``Y donut -1`` () =
         let input = array2D [[1;2;3];[4;5;6];[7;8;9]]
@@ -169,7 +196,7 @@ module ``Array2D translate`` =
         let expected = array2D [[7;8;9];[1;2;3];[4;5;6]]
         let actual = input |> Array2D.translateY Array2D.TranslateMode.Donut 0 4
         Assert.Equal(expected, actual)
-        
+
     [<Fact>]
     let ``Y donut -4`` () =
         let input = array2D [[1;2;3];[4;5;6];[7;8;9]]

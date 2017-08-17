@@ -1,18 +1,16 @@
 ﻿open System
 open GameOfLife
 
-// let world: World = World.CreateRandom 3 3 |> World.Pad 2 0
-let world: World = 
+let world: World =
     Array2D.create 10 10 0
-        |> Array2D.insertAt (Common.glider |> Array2D.pad 2 0) (2, 2)
-
-// let world2: World =
-//     array2D [[0;0;0;0;1];[0;0;0;0;1];[0;0;0;0;1];[0;0;0;0;0];[0;0;0;0;0]]
-//         |> Array2D.pad 2 0
+        |> Array2D.insertAt (Life.Shapes.Spaceship.glider) (0, 0)
+        |> Array2D.insertAt (Life.Shapes.Spaceship.glider |> Array2D.flipX) (6, 0)
+        |> Array2D.insertAt (Life.Shapes.Spaceship.glider |> Array2D.flipY) (0, 6)
+        |> Array2D.insertAt (Life.Shapes.Spaceship.glider |> Array2D.flipXY) (6, 6)
 
 [<EntryPoint>]
 let main argv: int =
-    [|0..4|]
+    [|0..20|]
         |> Array.map (
             (fun f a b c-> f a c b) // swaps 2nd and 3rd parameter so we can be passing i
                 <| Life.recursive // function being swapped
