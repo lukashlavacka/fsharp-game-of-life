@@ -10,13 +10,8 @@ let world: World =
 
 [<EntryPoint>]
 let main argv: int =
-    [|0..20|]
-        |> Array.map (
-            (fun f a b c-> f a c b) // swaps 2nd and 3rd parameter so we can be passing i
-                <| Life.recursive // function being swapped
-                <| Array2D.TranslateMode.MoebiusX // first parameter
-                <| world // 3rd parameter now is second
-        ) // applies i to swapped lifeRec
-        |> Pretty.worlds true
+    Life.recursiveSeq Array2D.TranslateMode.MoebiusX 20 world
+        |> Seq.map (Pretty.world true)
+        |> String.concat "\n"
         |> printfn "%O"
     0 // return an integer exit code

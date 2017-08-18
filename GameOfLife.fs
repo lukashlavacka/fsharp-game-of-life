@@ -4,7 +4,9 @@ open System
 
 module Array2D =
     type TranslateMode = Zero | Donut | CylinderX | CylinderY | MoebiusX | MoebiusY
+    /// Flattens Array2D to Array
     let flatten<'T> (arr: 'T[,]) = arr |> Seq.cast<'T> |> Seq.toArray
+    /// Converts Array2D to Array of Arrays
     let toArray<'T> (arr: 'T[,]) = Array.init (Array2D.length1 arr) (fun i -> arr.[i, *] )
     let translateX<'T> (mode: TranslateMode) (zero: 'T) (o: int) (arr: 'T[,]) =
         match mode with
@@ -95,15 +97,19 @@ module Array2D =
     let add (arr1: 'T[,]) (arr2: 'T[,]) =
         arr1 |>
             Array2D.mapi (fun x y c -> c + arr2.[x,y])
+    /// Sets true value where both arrays have non zero, otherwise sets zero
     let andAnother (zero: 'T) (trueVal: 'T) (arr1: 'T[,]) (arr2: 'T[,]) =
         arr1 |>
             Array2D.mapi (fun x y c -> if c <> zero && arr2.[x,y] <> zero then trueVal else zero)
+    /// Sets true value where both arrays have non zero, otherwise sets zero
     let andAnotherTuple (zero: 'T) (trueVal: 'T) (arr1: 'T[,], arr2: 'T[,]) =
         arr1 |>
             Array2D.mapi (fun x y c -> if c <> zero && arr2.[x,y] <> zero then trueVal else zero)
+    /// Sets trueVal where array has cmp value, otherwise sets zero
     let andVal (zero: 'T) (trueVal: 'T) (cmp: 'T) (arr1: 'T[,]) =
         arr1 |>
             Array2D.mapi (fun x y c -> if c = cmp then trueVal else zero)
+    /// Sets true value where any array is non zero, otherwise sets zero
     let orAnother (zero: 'T) (trueVal: 'T) (arr1: 'T[,]) (arr2: 'T[,]) =
         arr1 |>
             Array2D.mapi (fun x y c -> if c = zero && arr2.[x,y] = zero then zero else trueVal)
@@ -168,6 +174,17 @@ module Life =
             Array2D.equals w (one mode w)
         then w
         else recursive mode (i - 1) (one mode w)
+    let rec recursiveSeq (mode: Array2D.TranslateMode) (upTo: int) (w: World): seq<World> =
+        seq {
+            if
+                upTo < 1 ||
+                Array2D.isEmpty 0 w ||
+                Array2D.equals w (one mode w)
+            then ()
+            else
+                yield w
+                yield! recursiveSeq mode (upTo - 1) (one mode w)
+        }
     module Shapes =
         module StillLife =
             let block =
