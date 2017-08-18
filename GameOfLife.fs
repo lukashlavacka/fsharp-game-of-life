@@ -137,7 +137,10 @@ type World = Cell[,]
 
 module Pretty =
     let cell (isPretty: bool) (c: Cell) =
-        if c > 0 then (if isPretty then "x" else c.ToString()) else (if isPretty then " " else "0")
+        if c > 0 then
+            if isPretty then "x" else c.ToString()
+        else
+            if isPretty then " " else "0"
     let row (isPretty: bool) (r: Cell[]) =
         (if isPretty then "|" else "") +
         (r |> Array.map (cell isPretty) |> String.concat "") +
@@ -242,6 +245,13 @@ module Life =
                     [0;0;0;0;0;0;0;0];
                     [1;1;0;0;0;0;1;0];
                     [0;1;0;0;0;1;1;1];
+                ]
+                |> Array2D.pad 1 0
+            let rPentomino =
+                array2D [
+                    [0;1;1];
+                    [1;1;0];
+                    [0;1;0]
                 ]
                 |> Array2D.pad 1 0
 #warn "0058"
