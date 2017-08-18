@@ -3,7 +3,7 @@ module GameOfLife
 open System
 
 module Array2D =
-    type TranslateMode = Zero | Donut | CylinderX | CylinderY | MoebiusX | MoebiusY
+    type TranslateMode = Zero | Donut | CylinderX | CylinderY | MoebiusX | MoebiusY | MoebiusXY
     /// Flattens Array2D to Array
     let flatten<'T> (arr: 'T[,]) = arr |> Seq.cast<'T> |> Seq.toArray
     /// Converts Array2D to Array of Arrays
@@ -24,7 +24,7 @@ module Array2D =
                     else if ix - mx >= xLength then arr.[iy, (ix - mx) % xLength]
                     else arr.[iy, ix - mx]
                 )
-            | MoebiusX -> arr |> Array2D.mapi (fun iy ix _ ->
+            | MoebiusX | MoebiusXY -> arr |> Array2D.mapi (fun iy ix _ ->
                     let xLength = Array2D.length1 arr
                     let yLength = Array2D.length2 arr
                     let mx = o % xLength
@@ -54,7 +54,7 @@ module Array2D =
                     else if iy - my >= yLength then arr.[(iy - my) % yLength, ix]
                     else arr.[iy - my, ix]
                 )
-            | MoebiusY -> arr |> Array2D.mapi (fun iy ix _ ->
+            | MoebiusY | MoebiusXY -> arr |> Array2D.mapi (fun iy ix _ ->
                     let xLength = Array2D.length1 arr
                     let yLength = Array2D.length2 arr
                     let my = o % yLength
@@ -126,6 +126,11 @@ module Array2D =
             |> flatten
             |> Array.exists (fun (a, b) -> a <> b)
             |> not
+module Seq =
+    let takeEvery (n: int) (s: seq<'T>) =
+        s
+            |> Seq.mapi (fun i e -> if i % n = 0 then Some(e) else None)
+            |> Seq.choose id
 
 type Cell = int
 type World = Cell[,]
@@ -148,21 +153,14 @@ module Pretty =
 #nowarn "0064"
 module Life =
     let one (mode: Array2D.TranslateMode) (w: World) =
-        [|3;4|]
-        |> Array.map (fun i -> Array2D.andVal 0 1 i (
-                (Array.map ((Array2D.translate mode 0) >> ((fun f -> f w))) [|
-                    (-1,-1);
-                    (-1, 0);
-                    (-1, 1);
-                    ( 0,-1);
-                    ( 0, 0);
-                    ( 0, 1);
-                    ( 1,-1);
-                    ( 1, 0);
-                    ( 1, 1);
-                |])
-                |> Array.reduce Array2D.add
-            ))
+        Array.map (fun i -> Array2D.andVal 0 1 i (
+            (Array.map ((Array2D.translate mode 0) >> ((fun f -> f w))) [|
+                (-1,-1);( 0,-1);( 1,-1);
+                (-1, 0);( 0, 0);( 1, 0);
+                (-1, 1);( 0, 1);( 1, 1);
+            |])
+            |> Array.reduce Array2D.add
+        )) <| [|3;4|]
         |> Array.zip [| Array2D.cloneWith 1 w; w |]
         |> Array.map (Array2D.andAnotherTuple 0 1)
         |> Array.reduce (Array2D.orAnother 0 1)
@@ -180,7 +178,7 @@ module Life =
                 upTo < 1 ||
                 Array2D.isEmpty 0 w ||
                 Array2D.equals w (one mode w)
-            then ()
+            then yield w
             else
                 yield w
                 yield! recursiveSeq mode (upTo - 1) (one mode w)
@@ -236,6 +234,14 @@ module Life =
                     [1;0;0;0;0];
                     [1;0;0;0;1];
                     [1;1;1;1;0];
+                ]
+                |> Array2D.pad 1 0
+        module Methuselah =
+            let diehard =
+                array2D [
+                    [0;0;0;0;0;0;0;0];
+                    [1;1;0;0;0;0;1;0];
+                    [0;1;0;0;0;1;1;1];
                 ]
                 |> Array2D.pad 1 0
 #warn "0058"
