@@ -271,49 +271,49 @@ module ``pretty`` =
     let ``cell 1 pretty works`` () =
         let input = cOne
         let expected = "x"
-        let actual = input |> Pretty.cell cZero true
+        let actual = input |> Pretty.cell true
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``cell 1 unpretty works`` () =
         let input = cOne
         let expected = "1"
-        let actual = input |> Pretty.cell cZero false
+        let actual = input |> Pretty.cell false
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``cell 0 pretty works`` () =
         let input = cZero
         let expected = " "
-        let actual = input |> Pretty.cell cZero true
+        let actual = input |> Pretty.cell true
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``cell 0 unpretty works`` () =
         let input = cZero
         let expected = "0"
-        let actual = input |> Pretty.cell cZero false
+        let actual = input |> Pretty.cell false
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``row unpretty works`` () =
         let input = [| cOne; cZero; cOne |]
         let expected = "101"
-        let actual = input |> Pretty.row cZero false
+        let actual = input |> Pretty.row false
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``row pretty works`` () =
         let input = [| cOne; cZero; cOne |]
         let expected = "|x x|"
-        let actual = input |> Pretty.row cZero true
+        let actual = input |> Pretty.row true
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``world unpretty works`` () =
         let input = array2D [[cOne; cZero; cOne];[cOne; cZero; cOne];[cOne; cZero; cOne]]
         let expected = "101\n101\n101"
-        let actual = input |> Pretty.world cZero false
+        let actual = input |> Pretty.world false
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``world pretty works`` () =
         let input = array2D [[cOne; cZero; cOne];[cOne; cZero; cOne];[cOne; cZero; cOne]]
         let expected = "_____\n|x x|\n|x x|\n|x x|\n_____"
-        let actual = input |> Pretty.world cZero true
+        let actual = input |> Pretty.world true
         Assert.Equal(expected, actual)
 
 module ``life`` =
@@ -347,3 +347,34 @@ module ``life`` =
         let expected = input |> GameOfLife.one Array2D.TranslateMode.Zero |> GameOfLife.one Array2D.TranslateMode.Zero
         let actual = input |> GameOfLife.recursive Array2D.TranslateMode.Zero 2
         Assert.Equal(expected, actual)
+
+module ``seq`` =
+    [<Fact>]
+    let `` takeFirstEveryLast simple works`` () =
+        let input = {1..10}
+        let expected = [| 1;3;6;9;10 |] |> Array.toSeq
+        let actual = input |> Seq.takeFirstNthLast 3
+        Assert.Equal<int>(expected, actual)
+    [<Fact>]
+    let `` takeFirstEveryLast Nth = 1 works`` () =
+        let input = {1..10}
+        let expected = {1..10}
+        let actual = input |> Seq.takeFirstNthLast 1
+        Assert.Equal<int>(expected, actual)
+    [<Fact>]
+    let `` takeFirstEveryLast Nth > length works`` () =
+        let input = {1..10}
+        let expected = [| 1;10 |] |> Array.toSeq
+        let actual = input |> Seq.takeFirstNthLast 11
+        Assert.Equal<int>(expected, actual)
+    [<Fact>]
+    let `` takeFirstEveryLast length = 1 works`` () =
+        let input = [| 3 |] |> Array.toSeq
+        let expected = [| 3; 3 |] |> Array.toSeq
+        let actual = input |> Seq.takeFirstNthLast 10
+        Assert.Equal<int>(expected, actual)
+    [<Fact>]
+    let `` takeFirstEveryLast empty works`` () =
+        let input = Seq.empty
+        let actual = input |> Seq.takeFirstNthLast 10
+        Assert.Empty(actual)

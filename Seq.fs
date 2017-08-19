@@ -1,6 +1,21 @@
 module Seq
 
-let takeEvery (n: int) (s: seq<'T>) =
-    s
-        |> Seq.mapi (fun i e -> if i % n = 0 then Some(e) else None)
-        |> Seq.choose id
+let takeFirstNthLast (nth: int) (s: seq<'T>): seq<'T> =
+    seq {
+        use en = s.GetEnumerator()
+        // Call MoveNext at most 'n' times (or return false earlier)
+        let rec nextN n =
+            let cur = en.Current
+            if n = 1 then cur // the outside loops skips once so we have to skip n-1 times
+            else if not (en.MoveNext()) then cur else (nextN (n - 1))
+
+        if en.MoveNext() then
+            // yield the first
+            yield en.Current
+            // skips nth - 1 and yield
+            if nth > 1 then yield nextN nth
+            // move once to next
+            while en.MoveNext() do
+                // skips nth - 1 and yield
+                yield nextN nth
+    }
