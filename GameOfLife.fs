@@ -10,21 +10,21 @@ let cOne: Cell = 1uy
 type World = Cell[,]
 
 module Pretty =
-    let cell (zero: Cell) (isPretty: bool) (c: Cell) =
-        if c <> zero then
+    let cell (isPretty: bool) (c: Cell) =
+        if c <> cZero then
             if isPretty then "x" else c.ToString()
         else
             if isPretty then " " else "0"
-    let row (zero: Cell) (isPretty: bool) (r: Cell[]) =
+    let row (isPretty: bool) (r: Cell[]) =
         (if isPretty then "|" else "") +
-        (r |> Array.map (cell zero isPretty) |> String.concat "") +
+        (r |> Array.map (cell isPretty) |> String.concat "") +
         (if isPretty then "|" else "")
-    let world (zero: Cell) (isPretty: bool) (w: World) =
+    let world (isPretty: bool) (w: World) =
         (if isPretty then (Array.fold (fun c _ -> c + "_") "_" w.[0,*]) + "_\n" else "") +
-        (w |> Array2D.toArray |> Array.map (row zero isPretty) |> String.concat "\n") +
+        (w |> Array2D.toArray |> Array.map (row isPretty) |> String.concat "\n") +
         (if isPretty then "\n_" + (Array.fold (fun c _ -> c + "_") "_" w.[0,*]) else "")
-    let worlds (zero: Cell) (isPretty: bool) (ws: World[]) =
-        ws |> Array.map (world zero isPretty) |> String.concat("\n")
+    let worlds (isPretty: bool) (ws: World[]) =
+        ws |> Array.map (world isPretty) |> String.concat("\n")
 
 #nowarn "0058"
 #nowarn "0064"
@@ -51,7 +51,7 @@ let rec recursive (mode: Array2D.TranslateMode) (i: int) (w: World) =
 let rec recursiveSeq (mode: Array2D.TranslateMode) (upTo: int) (w: World): seq<World> =
     seq {
         if
-            upTo < 1 ||
+            upTo <= 1 ||
             Array2D.isEmpty cZero w ||
             Array2D.equals w (one mode w)
         then yield w
