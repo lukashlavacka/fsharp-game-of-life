@@ -1,5 +1,6 @@
 module GameOfLife
 
+type Types
 type Cell = byte
 /// Defines function adding 2 Cells together
 let addFn (a: Cell) (b: Cell): Cell = a + b
@@ -25,6 +26,17 @@ module Pretty =
         (if isPretty then "\n_" + (Array.fold (fun c _ -> c + "_") "_" w.[0,*]) else "")
     let worlds (isPretty: bool) (ws: World[]) =
         ws |> Array.map (world isPretty) |> String.concat("\n")
+
+type Printable =
+    | C of Cell
+    | R of Cell[]
+    | W of World
+    | Ws of World[]
+let pretty (isPretty: bool) = function
+    | Printable.C(t) -> Pretty.cell isPretty t
+    | Printable.R(t) -> Pretty.row isPretty t
+    | Printable.W(t) -> Pretty.world isPretty t
+    | Printable.Ws(t) -> Pretty.worlds isPretty t
 
 #nowarn "0058"
 #nowarn "0064"
