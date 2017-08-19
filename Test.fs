@@ -4,6 +4,7 @@ open System
 open Xunit
 open GameOfLife
 
+
 module ``Array2D `` =
     [<Fact>]
     let ``flatten works`` () =
@@ -268,81 +269,81 @@ module ``Array2D translate`` =
 module ``pretty`` =
     [<Fact>]
     let ``cell 1 pretty works`` () =
-        let input = 1
+        let input = cOne
         let expected = "x"
-        let actual = input |> Pretty.cell true
+        let actual = input |> Pretty.cell cZero true
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``cell 1 unpretty works`` () =
-        let input = 1
+        let input = cOne
         let expected = "1"
-        let actual = input |> Pretty.cell false
+        let actual = input |> Pretty.cell cZero false
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``cell 0 pretty works`` () =
-        let input = 0
+        let input = cZero
         let expected = " "
-        let actual = input |> Pretty.cell true
+        let actual = input |> Pretty.cell cZero true
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``cell 0 unpretty works`` () =
-        let input = 0
+        let input = cZero
         let expected = "0"
-        let actual = input |> Pretty.cell false
+        let actual = input |> Pretty.cell cZero false
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``row unpretty works`` () =
-        let input = [| 1; 0; 1 |]
+        let input = [| cOne; cZero; cOne |]
         let expected = "101"
-        let actual = input |> Pretty.row false
+        let actual = input |> Pretty.row cZero false
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``row pretty works`` () =
-        let input = [| 1; 0; 1 |]
+        let input = [| cOne; cZero; cOne |]
         let expected = "|x x|"
-        let actual = input |> Pretty.row true
+        let actual = input |> Pretty.row cZero true
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``world unpretty works`` () =
-        let input = array2D [[1; 0; 1];[1; 0; 1];[1; 0; 1]]
+        let input = array2D [[cOne; cZero; cOne];[cOne; cZero; cOne];[cOne; cZero; cOne]]
         let expected = "101\n101\n101"
-        let actual = input |> Pretty.world false
+        let actual = input |> Pretty.world cZero false
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``world pretty works`` () =
-        let input = array2D [[1; 0; 1];[1; 0; 1];[1; 0; 1]]
+        let input = array2D [[cOne; cZero; cOne];[cOne; cZero; cOne];[cOne; cZero; cOne]]
         let expected = "_____\n|x x|\n|x x|\n|x x|\n_____"
-        let actual = input |> Pretty.world true
+        let actual = input |> Pretty.world cZero true
         Assert.Equal(expected, actual)
 
 module ``life`` =
     [<Fact>]
     let `` evolution one`` () =
-        let input = array2D [[0;0;0;0;0];[0;0;0;0;0];[0;1;1;1;0];[0;0;0;0;0];[0;0;0;0;0]]
-        let expected = array2D [[0;0;0;0;0];[0;0;1;0;0];[0;0;1;0;0];[0;0;1;0;0];[0;0;0;0;0]]
-        let actual = input |> Life.one Array2D.TranslateMode.Zero
+        let input = array2D [[cZero;cZero;cZero;cZero;cZero];[cZero;cZero;cZero;cZero;cZero];[cZero;cOne;cOne;cOne;cZero];[cZero;cZero;cZero;cZero;cZero];[cZero;cZero;cZero;cZero;cZero]]
+        let expected = array2D [[cZero;cZero;cZero;cZero;cZero];[cZero;cZero;cOne;cZero;cZero];[cZero;cZero;cOne;cZero;cZero];[cZero;cZero;cOne;cZero;cZero];[cZero;cZero;cZero;cZero;cZero]]
+        let actual = input |> GameOfLife.one Array2D.TranslateMode.Zero
         Assert.Equal(expected, actual)
     [<Fact>]
     let `` evolution two`` () =
-        let input = array2D [[0;0;0;0;0];[0;0;0;0;0];[0;1;1;1;0];[0;0;0;0;0];[0;0;0;0;0]]
-        let expected = array2D [[0;0;0;0;0];[0;0;0;0;0];[0;1;1;1;0];[0;0;0;0;0];[0;0;0;0;0]]
-        let actual = input |> Life.one Array2D.TranslateMode.Zero |> Life.one Array2D.TranslateMode.Zero
+        let input = array2D [[cZero;cZero;cZero;cZero;cZero];[cZero;cZero;cZero;cZero;cZero];[cZero;cOne;cOne;cOne;cZero];[cZero;cZero;cZero;cZero;cZero];[cZero;cZero;cZero;cZero;cZero]]
+        let expected = array2D [[cZero;cZero;cZero;cZero;cZero];[cZero;cZero;cZero;cZero;cZero];[cZero;cOne;cOne;cOne;cZero];[cZero;cZero;cZero;cZero;cZero];[cZero;cZero;cZero;cZero;cZero]]
+        let actual = input |> GameOfLife.one Array2D.TranslateMode.Zero |> GameOfLife.one Array2D.TranslateMode.Zero
         Assert.Equal(expected, actual)
     [<Fact>]
     let `` evolution Donut one`` () =
-        let input = array2D [[1;1;0;0;1];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0]]
-        let expected = array2D [[1;0;0;0;0];[1;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[1;0;0;0;0]]
-        let actual = input |> Life.one Array2D.TranslateMode.Donut
+        let input = array2D [[cOne;cOne;cZero;cZero;cOne];[cZero;cZero;cZero;cZero;cZero];[cZero;cZero;cZero;cZero;cZero];[cZero;cZero;cZero;cZero;cZero];[cZero;cZero;cZero;cZero;cZero]]
+        let expected = array2D [[cOne;cZero;cZero;cZero;cZero];[cOne;cZero;cZero;cZero;cZero];[cZero;cZero;cZero;cZero;cZero];[cZero;cZero;cZero;cZero;cZero];[cOne;cZero;cZero;cZero;cZero]]
+        let actual = input |> GameOfLife.one Array2D.TranslateMode.Donut
         Assert.Equal(expected, actual)
     [<Fact>]
     let `` evolution Donut two`` () =
-        let input = array2D [[1;0;0;1;1];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0]]
-        let expected = array2D [[1;0;0;1;1];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0]]
-        let actual = input |> Life.one Array2D.TranslateMode.Donut |> Life.one Array2D.TranslateMode.Donut
+        let input = array2D [[cOne;cZero;cZero;cOne;cOne];[cZero;cZero;cZero;cZero;cZero];[cZero;cZero;cZero;cZero;cZero];[cZero;cZero;cZero;cZero;cZero];[cZero;cZero;cZero;cZero;cZero]]
+        let expected = array2D [[cOne;cZero;cZero;cOne;cOne];[cZero;cZero;cZero;cZero;cZero];[cZero;cZero;cZero;cZero;cZero];[cZero;cZero;cZero;cZero;cZero];[cZero;cZero;cZero;cZero;cZero]]
+        let actual = input |> GameOfLife.one Array2D.TranslateMode.Donut |> GameOfLife.one Array2D.TranslateMode.Donut
         Assert.Equal(expected, actual)
     [<Fact>]
     let ``Rec two works`` () =
-        let input = array2D [[0;0;0;0;0];[0;0;0;0;0];[0;1;1;1;0];[0;0;0;0;0];[0;0;0;0;0]]
-        let expected = input |> Life.one Array2D.TranslateMode.Zero |> Life.one Array2D.TranslateMode.Zero
-        let actual = input |> Life.recursive Array2D.TranslateMode.Zero 2
+        let input = array2D [[cZero;cZero;cZero;cZero;cZero];[cZero;cZero;cZero;cZero;cZero];[cZero;cOne;cOne;cOne;cZero];[cZero;cZero;cZero;cZero;cZero];[cZero;cZero;cZero;cZero;cZero]]
+        let expected = input |> GameOfLife.one Array2D.TranslateMode.Zero |> GameOfLife.one Array2D.TranslateMode.Zero
+        let actual = input |> GameOfLife.recursive Array2D.TranslateMode.Zero 2
         Assert.Equal(expected, actual)

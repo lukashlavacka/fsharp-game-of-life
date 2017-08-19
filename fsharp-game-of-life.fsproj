@@ -6,6 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Array2D.fs" />
+    <Compile Include="Seq.fs" />
     <Compile Include="GameOfLife.fs" />
     <Compile Include="Test.fs" />
     <Compile Include="Program.fs" />
