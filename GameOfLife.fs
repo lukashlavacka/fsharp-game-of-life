@@ -29,8 +29,8 @@ module Pretty =
 #nowarn "0058"
 #nowarn "0064"
 let one (mode: Array2D.TranslateMode) (w: World) =
-    Array.map (fun i -> Array2D.andVal cZero cOne i (
-        (Array.map ((Array2D.translate mode cZero) >> ((fun f -> f w))) [|
+    Array.Parallel.map (fun i -> Array2D.andVal cZero cOne i (
+        (Array.Parallel.map ((Array2D.translate mode cZero) >> ((fun f -> f w))) [|
             (-1,-1);( 0,-1);( 1,-1);
             (-1, 0);( 0, 0);( 1, 0);
             (-1, 1);( 0, 1);( 1, 1);
@@ -38,7 +38,7 @@ let one (mode: Array2D.TranslateMode) (w: World) =
         |> Array.reduce (Array2D.add addFn)
     )) <| [|3uy;4uy|]
     |> Array.zip [| Array2D.cloneWith cOne w; w |]
-    |> Array.map (Array2D.andAnotherTuple cZero cOne)
+    |> Array.Parallel.map (Array2D.andAnotherTuple cZero cOne)
     |> Array.reduce (Array2D.orAnother cZero cOne)
 
 let rec recursive (mode: Array2D.TranslateMode) (i: int) (w: World) =
