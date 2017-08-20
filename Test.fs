@@ -378,3 +378,9 @@ module ``seq`` =
         let input = Seq.empty
         let actual = input |> Seq.takeFirstNthLast 10
         Assert.Empty(actual)
+    [<Fact>]
+    let `` takeFirstEveryLastIndex simple works`` () =
+        let input = {1..10}
+        let expected = [| (1, 1);(3, 3);(6, 6);(9, 9); (10, 10) |] |> Array.toSeq
+        let actual = input |> Seq.takeFirstNthLastIndex 3
+        Assert.Equal<(int * int)>(expected, actual)

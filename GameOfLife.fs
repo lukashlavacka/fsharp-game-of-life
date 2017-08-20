@@ -24,13 +24,19 @@ module Pretty =
         (if isPretty then (Array.fold (fun c _ -> c + "_") "_" w.[0,*]) + "_\n" else "") +
         (w |> Array2D.toArray |> Array.map (row isPretty) |> String.concat "\n") +
         (if isPretty then "\n_" + (Array.fold (fun c _ -> c + "_") "_" w.[0,*]) else "")
+    let indexedWorld (isPretty: bool) (w: World, i: int) =
+        "Iteration: " + (string i) + "\n" + world isPretty w
     let worlds (isPretty: bool) (ws: World[]) =
         ws |> Array.map (world isPretty) |> String.concat("\n")
+    let indexedWorlds (isPretty: bool) (ws: (World * int)[]) =
+        ws |> Array.map (indexedWorld isPretty) |> String.concat("\n")
     type Printable =
         | Cell of Cell
         | Row of Cell[]
         | World of Cell[,]
         | Worlds of Cell[,][]
+        | IndexedWorld of Cell[,] * int
+        | IndexedWorlds of (Cell[,] * int)[]
         | None
     let makePrintable p =
         match box p with
@@ -38,12 +44,16 @@ module Pretty =
         | :? (Cell[]) as r -> Printable.Row(r)
         | :? World as w -> Printable.World(w)
         | :? (World[]) as ws -> Printable.Worlds(ws)
+        | :? (World * int) as iw -> Printable.IndexedWorld(iw)
+        | :? ((World * int)[]) as iws -> Printable.IndexedWorlds(iws)
         | _ -> None
     let prettyPrintable (isPretty: bool) = function
         | Printable.Cell(t) -> cell isPretty t
         | Printable.Row(t) -> row isPretty t
         | Printable.World(t) -> world isPretty t
         | Printable.Worlds(t) -> worlds isPretty t
+        | Printable.IndexedWorld(t, i) -> indexedWorld isPretty (t, i)
+        | Printable.IndexedWorlds(t) -> indexedWorlds isPretty t
         | Printable.None -> ""
 
 let pretty (isPretty: bool) = Pretty.makePrintable >> Pretty.prettyPrintable isPretty

@@ -13,6 +13,6 @@ let main argv: int =
     GameOfLife.recursiveSeq Array2D.TranslateMode.Donut 100 world
         // |> Seq.length
         // |> Seq.last |> Pretty.world cZero true
-        |> Seq.takeFirstNthLast 10 |> Seq.toArray |> pretty true
+        |> Seq.takeFirstNthLastIndex 10 |> Seq.toArray |> pretty true
         |> printfn "%O"
     0 // return an integer exit code
