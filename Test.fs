@@ -45,6 +45,20 @@ module ``Array2D `` =
         let input2 = array2D [[0;0;1];[0;0;1];[0;0;0]]
         let actual = Array2D.equals input1 input2
         Assert.False(actual)
+    [<Fact>]
+    let ``insertAt works (0,1)`` () =
+        let input1 = array2D [[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0]]
+        let input2 = array2D [[1;2;3];[4;5;6]]
+        let expected = array2D [[0;1;2;3;0];[0;4;5;6;0];[0;0;0;0;0];[0;0;0;0;0]]
+        let actual = Array2D.insertAt input2 (1,0) input1
+        Assert.Equal(expected, actual)
+    [<Fact>]
+    let ``insertAt works (1,2) `` () =
+        let input1 = array2D [[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0]]
+        let input2 = array2D [[1;2;3];[4;5;6]]
+        let expected = array2D [[0;0;0;0;0];[0;0;0;0;0];[0;1;2;3;0];[0;4;5;6;0]]
+        let actual = Array2D.insertAt input2 (1,2) input1
+        Assert.Equal(expected, actual)
 
 module ``Array2D translate`` =
     [<Fact>]

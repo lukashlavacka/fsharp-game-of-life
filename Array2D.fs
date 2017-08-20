@@ -69,16 +69,25 @@ let translateY<'T> (mode: TranslateMode) (zero: 'T) (o: int) (arr: 'T[,]) =
             )
 let translate<'T> (mode: TranslateMode) (zero: 'T) (x: int, y: int) = translateX mode zero y >> translateY mode zero x
 let insertAt<'T> (src: 'T[,]) (x: int, y: int) (dst: 'T[,]) =
-    Array2D.init (Array2D.length1 dst) (Array2D.length2 dst) (fun ix iy ->
-        if ix >= x && ix < (x + Array2D.length1 src) && iy >= y && iy < (y + Array2D.length2 src)
-        then src.[ix - x, iy - y]
-        else dst.[ix, iy]
-    )
+    Array2D.mapi (fun iy ix _ ->
+        if iy >= y && iy < (y + Array2D.length1 src) && ix >= x && ix < (x + Array2D.length2 src)
+        then src.[iy - y, ix - x]
+        else dst.[iy, ix]
+    ) dst
+let insertAtCenter<'T> (src: 'T[,]) (dst: 'T[,]) =
+    insertAt src ((Array2D.length1 dst - Array2D.length1 src) / 2, (Array2D.length2 dst - Array2D.length2 src) / 2) dst
+let insertAtQuadrant<'T> (q: int) (src: 'T[,]) (dst: 'T[,]) =
+    match q with
+    | 1 -> insertAt src ((Array2D.length1 dst / 4 * 3) - (Array2D.length1 src / 2), (Array2D.length2 dst / 4    ) - (Array2D.length2 src / 2)) dst
+    | 2 -> insertAt src ((Array2D.length1 dst / 4    ) - (Array2D.length1 src / 2), (Array2D.length2 dst / 4    ) - (Array2D.length2 src / 2)) dst
+    | 3 -> insertAt src ((Array2D.length1 dst / 4    ) - (Array2D.length1 src / 2), (Array2D.length2 dst / 4 * 3) - (Array2D.length2 src / 2)) dst
+    | 4 -> insertAt src ((Array2D.length1 dst / 4 * 3) - (Array2D.length1 src / 2), (Array2D.length2 dst / 4 * 3) - (Array2D.length2 src / 2)) dst
+    | _ -> insertAtCenter src dst
 let pad<'T> (padSize: int) (padWith: 'T) (arr: 'T[,]) =
-    Array2D.init ( Array2D.length1 arr + 2 * padSize) (Array2D.length2 arr + 2 * padSize) (fun x y ->
-        if x < padSize || y < padSize || x >= (Array2D.length1 arr + padSize) || y >= (Array2D.length2 arr + padSize)
+    Array2D.init ( Array2D.length1 arr + 2 * padSize) (Array2D.length2 arr + 2 * padSize) (fun y x ->
+        if y < padSize || x < padSize || y >= (Array2D.length1 arr + padSize) || x >= (Array2D.length2 arr + padSize)
         then padWith
-        else arr.[x - padSize, y-padSize]
+        else arr.[y - padSize, x-padSize]
     )
 let initRandom (x: int) (y: int) (randomMax: int) (r: int -> 'T) =
     let rnd = Random()
@@ -92,28 +101,28 @@ let toOne (zero: 'T) (one: 'T) (arr: 'T[,]) =
 let isEmpty (zero: 'T) = flatten >> Array.exists (fun v -> v <> zero) >> not
 let zip (arr1: 'T[,]) (arr2: 'T[,]) =
     arr1 |>
-        Array2D.mapi (fun x y c -> (c, arr2.[x,y]))
+        Array2D.mapi (fun y x c -> (c, arr2.[y,x]))
 let add (addFn: 'T -> 'T -> 'T) (arr1: 'T[,]) (arr2: 'T[,]) =
     arr1 |>
-        Array2D.mapi (fun x y c -> addFn c arr2.[x,y])
+        Array2D.mapi (fun y x c -> addFn c arr2.[y,x])
 /// Sets true value where both arrays have non zero, otherwise sets zero
 let andAnother (zero: 'T) (trueVal: 'T) (arr1: 'T[,]) (arr2: 'T[,]) =
     arr1 |>
-        Array2D.mapi (fun x y c -> if c <> zero && arr2.[x,y] <> zero then trueVal else zero)
+        Array2D.mapi (fun y x c -> if c <> zero && arr2.[y,x] <> zero then trueVal else zero)
 /// Sets trueVal where array has cmp value, otherwise sets zero
 let andVal (zero: 'T) (trueVal: 'T) (cmp: 'T) (arr1: 'T[,]) =
     arr1 |>
-        Array2D.mapi (fun x y c -> if c = cmp then trueVal else zero)
+        Array2D.map (fun v -> if v = cmp then trueVal else zero)
 /// Sets true value where any array is non zero, otherwise sets zero
 let orAnother (zero: 'T) (trueVal: 'T) (arr1: 'T[,]) (arr2: 'T[,]) =
     arr1 |>
-        Array2D.mapi (fun x y c -> if c = zero && arr2.[x,y] = zero then zero else trueVal)
+        Array2D.mapi (fun y x c -> if c = zero && arr2.[y,x] = zero then zero else trueVal)
 let flipX<'T> (arr: 'T[,]) =
     arr |>
-        Array2D.mapi (fun x y _-> arr.[Array2D.length1 arr - x - 1, y])
+        Array2D.mapi (fun y x _-> arr.[y, Array2D.length2 arr - x - 1])
 let flipY<'T> (arr: 'T[,]) =
     arr |>
-        Array2D.mapi (fun x y _-> arr.[x, Array2D.length2 arr - y - 1])
+        Array2D.mapi (fun y x _-> arr.[Array2D.length1 arr - y - 1, x])
 let flipXY<'T> : 'T[,] -> 'T[,] = flipX >> flipY
 let equals (arr1: 'T[,]) (arr2: 'T[,]) =
     arr1
