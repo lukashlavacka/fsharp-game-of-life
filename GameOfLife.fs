@@ -39,18 +39,17 @@ let pretty (isPretty: bool) = function
     | Printable.W(t) -> Pretty.world isPretty t
     | Printable.Ws(t) -> Pretty.worlds isPretty t
 
-let a = (||>)
 
 #nowarn "0058"
 #nowarn "0064"
 let one (mode: Array2D.TranslateMode) (w: World) =
-    Array.Parallel.map (fun i -> Array2D.andVal cZero cOne i (
+    Array.Parallel.map ((Array2D.andVal cZero cOne) >> (swap (
         (Array.Parallel.map
             ((Array2D.translate mode cZero) >> (swap w))
             (Array.allPairs [|-1;0;1|] [|-1;0;1|])
         )
         |> Array.reduce (Array2D.add addFn)
-    )) <| [|3uy;4uy|]
+    ))) <| [|3uy;4uy|]
     |> Array.zip [| Array2D.cloneWith cOne w; w |]
     |> Array.Parallel.map ((<||) (Array2D.andAnother cZero cOne))
     |> Array.reduce (Array2D.orAnother cZero cOne)
