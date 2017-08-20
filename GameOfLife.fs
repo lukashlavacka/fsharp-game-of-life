@@ -8,7 +8,6 @@ let addFn (a: Cell) (b: Cell): Cell = a + b
 let cZero: Cell = 0uy
 let cOne: Cell = 1uy
 
-
 type World = Cell[,]
 
 module Pretty =
@@ -27,17 +26,27 @@ module Pretty =
         (if isPretty then "\n_" + (Array.fold (fun c _ -> c + "_") "_" w.[0,*]) else "")
     let worlds (isPretty: bool) (ws: World[]) =
         ws |> Array.map (world isPretty) |> String.concat("\n")
+    type Printable =
+        | Cell of Cell
+        | Row of Cell[]
+        | World of Cell[,]
+        | Worlds of Cell[,][]
+        | None
+    let makePrintable p =
+        match box p with
+        | :? Cell as c -> Printable.Cell(c)
+        | :? (Cell[]) as r -> Printable.Row(r)
+        | :? World as w -> Printable.World(w)
+        | :? (World[]) as ws -> Printable.Worlds(ws)
+        | _ -> None
+    let prettyPrintable (isPretty: bool) = function
+        | Printable.Cell(t) -> cell isPretty t
+        | Printable.Row(t) -> row isPretty t
+        | Printable.World(t) -> world isPretty t
+        | Printable.Worlds(t) -> worlds isPretty t
+        | Printable.None -> ""
 
-type Printable =
-    | C of Cell
-    | R of Cell[]
-    | W of World
-    | Ws of World[]
-let pretty (isPretty: bool) = function
-    | Printable.C(t) -> Pretty.cell isPretty t
-    | Printable.R(t) -> Pretty.row isPretty t
-    | Printable.W(t) -> Pretty.world isPretty t
-    | Printable.Ws(t) -> Pretty.worlds isPretty t
+let pretty (isPretty: bool) = Pretty.makePrintable >> Pretty.prettyPrintable isPretty
 
 
 #nowarn "0058"
