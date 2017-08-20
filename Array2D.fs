@@ -100,10 +100,6 @@ let add (addFn: 'T -> 'T -> 'T) (arr1: 'T[,]) (arr2: 'T[,]) =
 let andAnother (zero: 'T) (trueVal: 'T) (arr1: 'T[,]) (arr2: 'T[,]) =
     arr1 |>
         Array2D.mapi (fun x y c -> if c <> zero && arr2.[x,y] <> zero then trueVal else zero)
-/// Sets true value where both arrays have non zero, otherwise sets zero
-let andAnotherTuple (zero: 'T) (trueVal: 'T) (arr1: 'T[,], arr2: 'T[,]) =
-    arr1 |>
-        Array2D.mapi (fun x y c -> if c <> zero && arr2.[x,y] <> zero then trueVal else zero)
 /// Sets trueVal where array has cmp value, otherwise sets zero
 let andVal (zero: 'T) (trueVal: 'T) (cmp: 'T) (arr1: 'T[,]) =
     arr1 |>

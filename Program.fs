@@ -12,9 +12,7 @@ let world: World =
 let main argv: int =
     GameOfLife.recursiveSeq Array2D.TranslateMode.Zero 1000 world
         // |> Seq.length
-        |> Seq.last |> Pretty.world cZero true
-        // |> Seq.takeEvery 20
-        // |> Seq.map (Pretty.world true)
-        // |> String.concat "\n"
+        // |> Seq.last |> Pretty.world cZero true
+        |> Seq.takeFirstNthLast 100 |> Seq.toArray |> Pretty.worlds true
         |> printfn "%O"
     0 // return an integer exit code
