@@ -2,28 +2,27 @@ module GameOfLife
 
 open Operators
 
-type Cell = byte
-/// Defines function adding 2 Cells together
-let addFn (a: Cell) (b: Cell): Cell = a + b
-let cZero: Cell = 0uy
-let cOne: Cell = 1uy
+type Cell = bool
+let cellToByte (c: Cell): byte = if c then 1uy else 0uy
+let cZero: Cell = false
+let cOne: Cell = true
 
 type World = Cell[,]
 
 module Pretty =
     let cell (isPretty: bool) (c: Cell) =
         if c <> cZero then
-            if isPretty then "x" else c.ToString()
+            if isPretty then "[]" else c.ToString()
         else
-            if isPretty then " " else "0"
+            if isPretty then "  " else "0"
     let row (isPretty: bool) (r: Cell[]) =
         (if isPretty then "|" else "") +
         (r |> Array.map (cell isPretty) |> String.concat "") +
         (if isPretty then "|" else "")
     let world (isPretty: bool) (w: World) =
-        (if isPretty then (Array.fold (fun c _ -> c + "_") "_" w.[0,*]) + "_\n" else "") +
+        (if isPretty then (Array.fold (fun c _ -> c + "__") "_" w.[0,*]) + "_\n" else "") +
         (w |> Array2D.toArray |> Array.map (row isPretty) |> String.concat "\n") +
-        (if isPretty then "\n_" + (Array.fold (fun c _ -> c + "_") "_" w.[0,*]) else "")
+        (if isPretty then "\n_" + (Array.fold (fun c _ -> c + "__") "_" w.[0,*]) else "")
     let indexedWorld (isPretty: bool) (w: World, i: int) =
         "Iteration: " + (string i) + "\n" + world isPretty w
     let worlds (isPretty: bool) (ws: World[]) =
@@ -58,7 +57,6 @@ module Pretty =
 
 let pretty (isPretty: bool) = Pretty.makePrintable >> Pretty.prettyPrintable isPretty
 
-
 #nowarn "0058"
 #nowarn "0064"
 let one (mode: Array2D.TranslateMode) (w: World) =
@@ -67,30 +65,61 @@ let one (mode: Array2D.TranslateMode) (w: World) =
             ((Array2D.translate mode cZero) >> (swap w))
             (Array.allPairs [|-1;0;1|] [|-1;0;1|])
         )
-        |> Array.reduce (Array2D.add addFn)
+        |> Array.map (Array2D.map cellToByte)
+        |> Array.reduce (Array2D.add (+))
     ))) <| [|3uy;4uy|]
     |> Array.zip [| Array2D.cloneWith cOne w; w |]
     |> Array.Parallel.map ((<||) (Array2D.andAnother cZero cOne))
     |> Array.reduce (Array2D.orAnother cZero cOne)
 
-let rec recursive (mode: Array2D.TranslateMode) (i: int) (w: World) =
+let rec recursive (mode: Array2D.TranslateMode) (upTo: int) (w: World) =
     if
-        i < 1 ||
+        upTo < 1 ||
         Array2D.isEmpty cZero w ||
         Array2D.equals w (one mode w)
     then w
-    else recursive mode (i - 1) (one mode w)
+    else recursive mode (upTo - 1) (one mode w)
+
+let recursiveHashed (mode: Array2D.TranslateMode) (upTo: int) (w: World) =
+    let mutable hashStore = List.empty<int>
+    let rec recursive (mode: Array2D.TranslateMode) (upTo: int) (w: World) =
+        let currentHash = Array2D.hash w
+        if
+            upTo < 1 ||
+            Array2D.isEmpty cZero w ||
+            List.contains currentHash hashStore
+        then w
+        else
+            hashStore <- currentHash :: hashStore
+            recursive mode (upTo - 1) (one mode w)
+    recursive (mode: Array2D.TranslateMode) (upTo: int) (w: World)
+
 let rec recursiveSeq (mode: Array2D.TranslateMode) (upTo: int) (w: World): seq<World> =
     seq {
         if
             upTo <= 1 ||
-            Array2D.isEmpty cZero w ||
             Array2D.equals w (one mode w)
         then yield w
         else
             yield w
             yield! recursiveSeq mode (upTo - 1) (one mode w)
     }
+let recursiveSeqHashed (mode: Array2D.TranslateMode) (upTo: int) (w: World): seq<World> =
+    let mutable hashStore = List.empty<int>
+    let rec recursiveSeq (mode: Array2D.TranslateMode) (upTo: int) (w: World): seq<World> =
+        seq {
+            let currentHash = Array2D.hash w
+            if
+                upTo <= 1 ||
+                List.contains currentHash hashStore
+            then yield w
+            else
+                hashStore <- currentHash :: hashStore
+                yield w
+                yield! recursiveSeq mode (upTo - 1) (one mode w)
+        }
+    recursiveSeq (mode: Array2D.TranslateMode) (upTo: int) (w: World)
+
 module Shapes =
     module StillLife =
         let block =
@@ -159,5 +188,27 @@ module Shapes =
                 [cZero;cOne;cZero]
             ]
             |> Array2D.pad 1 cZero
+    module Oscilator =
+        let blinker =
+            array2D [
+                [cOne];
+                [cOne];
+                [cOne]
+            ]
+            |> Array2D.pad 1 cZero
+        let toad =
+            array2D [
+                [cZero;cZero;cZero;cZero];
+                [cZero;cOne;cOne;cOne];
+                [cOne;cOne;cOne;cZero];
+                [cZero;cZero;cZero;cZero];
+            ]
+        let beacon =
+            array2D [
+                [cOne;cOne;cZero;cZero];
+                [cOne;cOne;cZero;cZero];
+                [cZero;cZero;cOne;cOne];
+                [cZero;cZero;cOne;cOne];
+            ]
 #warn "0058"
 #warn "0064"

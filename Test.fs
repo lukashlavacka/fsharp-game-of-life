@@ -59,6 +59,69 @@ module ``Array2D `` =
         let expected = array2D [[0;0;0;0;0];[0;0;0;0;0];[0;1;2;3;0];[0;4;5;6;0]]
         let actual = Array2D.insertAt input2 (1,2) input1
         Assert.Equal(expected, actual)
+    [<Fact>]
+    let ``pad 1 works`` () =
+        let input = array2D [[1;1;1];[1;1;1];[1;1;1]]
+        let expected = array2D [[0;0;0;0;0];[0;1;1;1;0];[0;1;1;1;0];[0;1;1;1;0];[0;0;0;0;0]]
+        let actual = input |> Array2D.pad 1 0
+        Assert.Equal(expected, actual)
+    [<Fact>]
+    let ``insertAtCenter odd into odd`` () =
+        let input1 = array2D [[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0]]
+        let input2 = array2D [[1;2;3];[4;5;6];[7;8;9]]
+        let expected = array2D [[0;0;0;0;0];[0;1;2;3;0];[0;4;5;6;0];[0;7;8;9;0];[0;0;0;0;0]]
+        let actual = Array2D.insertAtCenter input2 input1
+        Assert.Equal(expected, actual)
+    [<Fact>]
+    let ``insertAtCenter odd into even`` () =
+        let input1 = array2D [[0;0;0;0;0;0];[0;0;0;0;0;0];[0;0;0;0;0;0];[0;0;0;0;0;0];[0;0;0;0;0;0];[0;0;0;0;0;0]]
+        let input2 = array2D [[1;2;3];[4;5;6];[7;8;9]]
+        let expected = array2D [[0;0;0;0;0;0];[0;1;2;3;0;0];[0;4;5;6;0;0];[0;7;8;9;0;0];[0;0;0;0;0;0];[0;0;0;0;0;0]]
+        let actual = Array2D.insertAtCenter input2 input1
+        Assert.Equal(expected, actual)
+    [<Fact>]
+    let ``insertAtCenter even into even`` () =
+        let input1 = array2D [[0;0;0;0;0;0];[0;0;0;0;0;0];[0;0;0;0;0;0];[0;0;0;0;0;0]]
+        let input2 = array2D [[1;2];[3;4]]
+        let expected = array2D [[0;0;0;0;0;0];[0;0;1;2;0;0];[0;0;3;4;0;0];[0;0;0;0;0;0]]
+        let actual = Array2D.insertAtCenter input2 input1
+        Assert.Equal(expected, actual)
+    [<Fact>]
+    let ``insertAtCenter even into odd`` () =
+        let input1 = array2D [[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0]]
+        let input2 = array2D [[1;2];[3;4]]
+        let expected = array2D [[0;0;0;0;0];[0;1;2;0;0];[0;3;4;0;0];[0;0;0;0;0];[0;0;0;0;0]]
+        let actual = Array2D.insertAtCenter input2 input1
+        Assert.Equal(expected, actual)
+    [<Fact>]
+    let ``hash notEquals`` () =
+        let input1 = array2D [[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0]]
+        let input2 = array2D [[0;0;0;0;0];[0;0;1;0;0];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0]]
+        let actual1 = Array2D.hash input1
+        let actual2 = Array2D.hash input2
+        Assert.NotEqual(actual1, actual2)
+    [<Fact>]
+    let ``hash equals`` () =
+        let input1 = array2D [[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0]]
+        let input2 = array2D [[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0];[0;0;0;0;0]]
+        let actual1 = Array2D.hash input1
+        let actual2 = Array2D.hash input2
+        Assert.Equal(actual1, actual2)
+    [<Fact>]
+    let ``hash large notEquals`` () =
+        let input1 = Array2D.create 64 64 0
+        let input2 = input1 |> Array2D.insertAtQuadrant 4 (array2D [[1]]);
+        let actual1 = Array2D.hash input1
+        let actual2 = Array2D.hash input2
+        Assert.NotEqual(input1, input2)
+        Assert.NotEqual(actual1, actual2)
+    [<Fact>]
+    let ``hash large Equals`` () =
+        let input1 = Array2D.create 64 64 1
+        let input2 = input1 |> Array2D.map id
+        let actual1 = Array2D.hash input1
+        let actual2 = Array2D.hash input2
+        Assert.Equal(actual1, actual2)
 
 module ``Array2D translate`` =
     [<Fact>]
@@ -284,7 +347,7 @@ module ``pretty`` =
     [<Fact>]
     let ``cell 1 pretty works`` () =
         let input = cOne
-        let expected = "x"
+        let expected = "[]"
         let actual = input |> Pretty.cell true
         Assert.Equal(expected, actual)
     [<Fact>]
@@ -296,7 +359,7 @@ module ``pretty`` =
     [<Fact>]
     let ``cell 0 pretty works`` () =
         let input = cZero
-        let expected = " "
+        let expected = "  "
         let actual = input |> Pretty.cell true
         Assert.Equal(expected, actual)
     [<Fact>]
@@ -314,7 +377,7 @@ module ``pretty`` =
     [<Fact>]
     let ``row pretty works`` () =
         let input = [| cOne; cZero; cOne |]
-        let expected = "|x x|"
+        let expected = "|[]  []|"
         let actual = input |> Pretty.row true
         Assert.Equal(expected, actual)
     [<Fact>]
@@ -326,7 +389,7 @@ module ``pretty`` =
     [<Fact>]
     let ``world pretty works`` () =
         let input = array2D [[cOne; cZero; cOne];[cOne; cZero; cOne];[cOne; cZero; cOne]]
-        let expected = "_____\n|x x|\n|x x|\n|x x|\n_____"
+        let expected = "________\n|[]  []|\n|[]  []|\n|[]  []|\n________"
         let actual = input |> Pretty.world true
         Assert.Equal(expected, actual)
 

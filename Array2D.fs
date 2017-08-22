@@ -75,13 +75,13 @@ let insertAt<'T> (src: 'T[,]) (x: int, y: int) (dst: 'T[,]) =
         else dst.[iy, ix]
     ) dst
 let insertAtCenter<'T> (src: 'T[,]) (dst: 'T[,]) =
-    insertAt src ((Array2D.length1 dst - Array2D.length1 src) / 2, (Array2D.length2 dst - Array2D.length2 src) / 2) dst
+    insertAt src ((Array2D.length2 dst - Array2D.length2 src) / 2, (Array2D.length1 dst - Array2D.length1 src) / 2) dst
 let insertAtQuadrant<'T> (q: int) (src: 'T[,]) (dst: 'T[,]) =
     match q with
-    | 1 -> insertAt src ((Array2D.length1 dst / 4 * 3) - (Array2D.length1 src / 2), (Array2D.length2 dst / 4    ) - (Array2D.length2 src / 2)) dst
-    | 2 -> insertAt src ((Array2D.length1 dst / 4    ) - (Array2D.length1 src / 2), (Array2D.length2 dst / 4    ) - (Array2D.length2 src / 2)) dst
-    | 3 -> insertAt src ((Array2D.length1 dst / 4    ) - (Array2D.length1 src / 2), (Array2D.length2 dst / 4 * 3) - (Array2D.length2 src / 2)) dst
-    | 4 -> insertAt src ((Array2D.length1 dst / 4 * 3) - (Array2D.length1 src / 2), (Array2D.length2 dst / 4 * 3) - (Array2D.length2 src / 2)) dst
+    | 1 -> insertAt src ((Array2D.length2 dst / 4 * 3) - (Array2D.length2 src / 2), (Array2D.length1 dst / 4    ) - (Array2D.length1 src / 2)) dst
+    | 2 -> insertAt src ((Array2D.length2 dst / 4    ) - (Array2D.length2 src / 2), (Array2D.length1 dst / 4    ) - (Array2D.length1 src / 2)) dst
+    | 3 -> insertAt src ((Array2D.length2 dst / 4    ) - (Array2D.length2 src / 2), (Array2D.length1 dst / 4 * 3) - (Array2D.length1 src / 2)) dst
+    | 4 -> insertAt src ((Array2D.length2 dst / 4 * 3) - (Array2D.length2 src / 2), (Array2D.length1 dst / 4 * 3) - (Array2D.length1 src / 2)) dst
     | _ -> insertAtCenter src dst
 let pad<'T> (padSize: int) (padWith: 'T) (arr: 'T[,]) =
     Array2D.init ( Array2D.length1 arr + 2 * padSize) (Array2D.length2 arr + 2 * padSize) (fun y x ->
@@ -110,7 +110,7 @@ let andAnother (zero: 'T) (trueVal: 'T) (arr1: 'T[,]) (arr2: 'T[,]) =
     arr1 |>
         Array2D.mapi (fun y x c -> if c <> zero && arr2.[y,x] <> zero then trueVal else zero)
 /// Sets trueVal where array has cmp value, otherwise sets zero
-let andVal (zero: 'T) (trueVal: 'T) (cmp: 'T) (arr1: 'T[,]) =
+let andVal (zero: 'T) (trueVal: 'T) (cmp: 'U) (arr1: 'U[,]) =
     arr1 |>
         Array2D.map (fun v -> if v = cmp then trueVal else zero)
 /// Sets true value where any array is non zero, otherwise sets zero
@@ -130,3 +130,8 @@ let equals (arr1: 'T[,]) (arr2: 'T[,]) =
         |> flatten
         |> Array.exists (fun (a, b) -> a <> b)
         |> not
+let hash (arr: 'T[,]) =
+    arr
+        |> toArray
+        |> Array.map hash
+        |> Array.reduce (^^^)
