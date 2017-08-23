@@ -1,5 +1,7 @@
 module Operators
-    let swap a b =
+    let inline swap a b =
         b a
-    let (><) a b =
+    let inline (><) a b =
         b a
+
+    let inline (-&-) a b = (a, b)

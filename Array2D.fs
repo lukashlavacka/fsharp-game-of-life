@@ -1,6 +1,6 @@
 module Array2D
 
-open System
+open Operators
 
 type TranslateMode = Zero | Donut | CylinderX | CylinderY | MoebiusX | MoebiusY | MoebiusXY
 /// Flattens Array2D to Array
@@ -90,7 +90,7 @@ let pad<'T> (padSize: int) (padWith: 'T) (arr: 'T[,]) =
         else arr.[y - padSize, x-padSize]
     )
 let initRandom (x: int) (y: int) (randomMax: int) (r: int -> 'T) =
-    let rnd = Random()
+    let rnd = System.Random()
     Array2D.init x y (fun x y -> r (rnd.Next(randomMax)) )
 let cloneWith (w: 'T) (arr: 'T[,]) =
     arr
@@ -130,8 +130,21 @@ let equals (arr1: 'T[,]) (arr2: 'T[,]) =
         |> flatten
         |> Array.exists (fun (a, b) -> a <> b)
         |> not
-let hash (arr: 'T[,]) =
+
+let boolSeqToInt (lst: list<bool>): uint64 =
+    if List.length lst > 64 then raise (System.ArgumentException("List must be shorter than 64"))
+    lst
+        |> List.mapi (-&-)
+        |> List.fold (fun c (i, v) ->
+                if v then
+                    c ||| (1UL <<< (64 - i))
+                else c
+            ) 0UL
+
+let hash (arr: bool[,]) =
     arr
-        |> toArray
-        |> Array.map hash
-        |> Array.reduce (^^^)
+        |> Seq.cast<bool>
+        |> Seq.toList
+        |> List.chunkBySize 64
+        |> List.map boolSeqToInt
+        |> List.reduce (^^^)

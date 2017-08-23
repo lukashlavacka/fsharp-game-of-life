@@ -2,8 +2,8 @@
 open GameOfLife
 
 let world: World =
-    Array2D.create 5 5 cZero
-        |> Array2D.insertAtCenter (GameOfLife.Shapes.Spaceship.glider)
+    Array2D.create 100 100 cZero
+        |> Array2D.insertAtCenter (GameOfLife.Shapes.Methuselah.rPentomino)
         // |> Array2D.insertAtQuadrant 1 (GameOfLife.Shapes.Spaceship.glider |> Array2D.flipX )
         // |> Array2D.insertAtQuadrant 2 (GameOfLife.Shapes.Spaceship.glider                  )
         // |> Array2D.insertAtQuadrant 3 (GameOfLife.Shapes.Spaceship.glider |> Array2D.flipY )
@@ -11,10 +11,11 @@ let world: World =
 
 [<EntryPoint>]
 let main argv: int =
-
-    GameOfLife.recursiveSeqHashed Array2D.TranslateMode.Donut 40 world
+    let sw = Diagnostics.Stopwatch.StartNew()
+    GameOfLife.recursiveSeq Array2D.TranslateMode.Donut 10000 world
         // |> Seq.length
-        // |> Seq.last |> Pretty.world cZero true
-        |> Seq.takeFirstNthLastIndex 5 |> Seq.toArray |> pretty true
-        |> printfn "%O"
+        |> Seq.takeWhileUnique Array2D.hash |> Seq.takeFirstNthLastIndex 10001 |> Seq.toArray |> pretty false
+        |> printfn "%A"
+    sw.Stop()
+    printfn "%O" sw.Elapsed
     0 // return an integer exit code

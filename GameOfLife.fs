@@ -12,7 +12,7 @@ type World = Cell[,]
 module Pretty =
     let cell (isPretty: bool) (c: Cell) =
         if c <> cZero then
-            if isPretty then "[]" else c.ToString()
+            if isPretty then "[]" else "1"
         else
             if isPretty then "  " else "0"
     let row (isPretty: bool) (r: Cell[]) =
@@ -80,45 +80,13 @@ let rec recursive (mode: Array2D.TranslateMode) (upTo: int) (w: World) =
     then w
     else recursive mode (upTo - 1) (one mode w)
 
-let recursiveHashed (mode: Array2D.TranslateMode) (upTo: int) (w: World) =
-    let mutable hashStore = List.empty<int>
-    let rec recursive (mode: Array2D.TranslateMode) (upTo: int) (w: World) =
-        let currentHash = Array2D.hash w
-        if
-            upTo < 1 ||
-            Array2D.isEmpty cZero w ||
-            List.contains currentHash hashStore
-        then w
-        else
-            hashStore <- currentHash :: hashStore
-            recursive mode (upTo - 1) (one mode w)
-    recursive (mode: Array2D.TranslateMode) (upTo: int) (w: World)
-
 let rec recursiveSeq (mode: Array2D.TranslateMode) (upTo: int) (w: World): seq<World> =
     seq {
-        if
-            upTo <= 1 ||
-            Array2D.equals w (one mode w)
-        then yield w
+        if upTo <= 1 then yield w
         else
             yield w
             yield! recursiveSeq mode (upTo - 1) (one mode w)
     }
-let recursiveSeqHashed (mode: Array2D.TranslateMode) (upTo: int) (w: World): seq<World> =
-    let mutable hashStore = List.empty<int>
-    let rec recursiveSeq (mode: Array2D.TranslateMode) (upTo: int) (w: World): seq<World> =
-        seq {
-            let currentHash = Array2D.hash w
-            if
-                upTo <= 1 ||
-                List.contains currentHash hashStore
-            then yield w
-            else
-                hashStore <- currentHash :: hashStore
-                yield w
-                yield! recursiveSeq mode (upTo - 1) (one mode w)
-        }
-    recursiveSeq (mode: Array2D.TranslateMode) (upTo: int) (w: World)
 
 module Shapes =
     module StillLife =

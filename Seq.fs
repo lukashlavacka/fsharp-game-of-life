@@ -40,3 +40,13 @@ let takeFirstNthLastIndex (nth: int) (s: seq<'T>): seq<'T * int> =
                 // skips nth - 1 and yield
                 yield (nextN nth, i)
     }
+
+let takeWhileUnique (hash: 'T -> 'U) (s: seq<'T>): seq<'T> =
+    seq {
+        let mutable hashStore = List.empty<'U>
+        use en = s.GetEnumerator()
+
+        while en.MoveNext() && not (List.contains (hash en.Current) hashStore) do
+            hashStore <- (hash en.Current) :: hashStore
+            yield en.Current
+    }
