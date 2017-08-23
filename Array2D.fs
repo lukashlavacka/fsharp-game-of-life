@@ -131,20 +131,23 @@ let equals (arr1: 'T[,]) (arr2: 'T[,]) =
         |> Array.exists (fun (a, b) -> a <> b)
         |> not
 
-let boolSeqToInt (lst: list<bool>): uint64 =
-    if List.length lst > 64 then raise (System.ArgumentException("List must be shorter than 64"))
-    lst
-        |> List.mapi (-&-)
-        |> List.fold (fun c (i, v) ->
-                if v then
-                    c ||| (1UL <<< (64 - i))
-                else c
-            ) 0UL
-
-let hash (arr: bool[,]) =
+let boolToInt (arr: bool[,]): list<uint64> =
     arr
         |> Seq.cast<bool>
         |> Seq.toList
         |> List.chunkBySize 64
-        |> List.map boolSeqToInt
+        |> List.map (fun lst ->
+            if List.length lst > 64 then raise (System.ArgumentException("List must be shorter than 64"))
+            lst
+                |> List.mapi (-&-)
+                |> List.fold (fun c (i, v) ->
+                        if v then
+                            c ||| (1UL <<< (64 - i))
+                        else c
+                    ) 0UL
+        )
+
+let hash (arr: bool[,]) =
+    arr
+        |> boolToInt
         |> List.reduce (^^^)
